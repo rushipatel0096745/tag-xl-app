@@ -1,0 +1,200 @@
+app
+ ┣ (app)
+ ┃ ┣ (asset)
+ ┃ ┃ ┣ _layout.tsx
+ ┃ ┃ ┣ asset-details.tsx
+ ┃ ┃ ┣ asset-edit.tsx
+ ┃ ┃ ┗ asset-list.tsx
+ ┃ ┣ (tabs)
+ ┃ ┃ ┣ _layout.tsx
+ ┃ ┃ ┣ index.tsx
+ ┃ ┃ ┗ profile.tsx
+ ┃ ┗ _layout.tsx
+ ┣ (auth)
+ ┃ ┣ _layout.tsx
+ ┃ ┗ sign-in.tsx
+ ┣ _layout.tsx
+ ┗ index.tsx
+
+
+            <Modal visible={isModalOpen} onRequestClose={closeModal} animationType='slide' transparent={true}>
+                <View className='flex-1 justify-center items-center bg-black/50'>
+                    <View className='bg-white rounded-2xl p-4 mx-4 w-full max-w-md flex flex-col gap-4'>
+                        {/* Header */}
+                        <View className='flex flex-row justify-between items-center border-b border-gray-200 pb-3'>
+                            <Text className='font-semibold text-[16px] text-gray-800'>Create New Tag Confirmation</Text>
+                            <TouchableOpacity
+                                className='bg-[#263f94] rounded-xl px-3 py-2 active:opacity-80'
+                                onPress={closeModal}>
+                                <Text className='text-white font-semibold text-sm'>Close</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Input */}
+                        <View className='flex flex-col gap-2'>
+                            <TextInput
+                                className='border border-gray-200 rounded-xl p-4 bg-gray-50 text-gray-800'
+                                placeholder='Unique ID'
+                                value={formData?.uid}
+                                onChangeText={(text) => handleUidChange(text)}
+                                inputMode='numeric'
+                                keyboardType='numeric'
+                                placeholderTextColor='#9CA3AF'
+                            />
+                            {errors.uid && <Text className='text-red-600 text-sm'>{errors.uid}</Text>}
+                        </View>
+
+                        <View className='flex flex-row justify-end gap-2'>
+                            <TouchableOpacity
+                                className='border border-[#263f94] rounded-xl px-4 py-2 active:opacity-80'
+                                onPress={closeModal}>
+                                <Text className='text-[#263f94] font-semibold text-sm'>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                className='bg-[#263f94] rounded-xl px-4 py-2 active:opacity-80'
+                                onPress={() => {
+                                    /* handle submit */
+                                    handleCreateTag()
+                                }}>
+                                <Text className='text-white font-semibold text-sm'>Yes, please</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+
+
+ this is (app)/_layout
+ import { useAuth } from "@/context/AuthContext";
+import { Redirect, Slot } from "expo-router";
+import { ActivityIndicator, View } from "react-native";
+
+export default function ProtectedLayout() {
+    const { sessionId, isLoading } = useAuth();
+
+    if (isLoading) {
+        return (
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <ActivityIndicator size='large' />
+            </View>
+        );
+    }
+
+    if (!sessionId) return <Redirect href='/(auth)/sign-in' />;
+
+    return (
+        // <Stack>
+        //     <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+        //     <Stack.Screen name='(asset)/asset-details' options={{ title: "Asset Details" }} />
+        //     <Stack.Screen name='(asset)/asset-list' options={{ title: "Assets" }} />
+        // </Stack>
+        <Slot />
+    );
+}
+
+
+this is (tab)/_layout
+import { Tabs } from "expo-router";
+import { Home, Package, User } from "lucide-react-native";
+
+export default function TabsLayout() {
+    return (
+        <Tabs screenOptions={{ headerShown: false }}>
+            <Tabs.Screen
+                name='index'
+                options={{
+                    title: "Home",
+                    tabBarIcon: ({ color }) => <Home color={color} />,
+                }}
+            />
+            <Tabs.Screen
+                name='(asset)'
+                options={{
+                    title: "Assets",
+                    tabBarIcon: ({ color }) => <Package color={color} />,
+                }}
+            />
+            <Tabs.Screen
+                name='profile'
+                options={{
+                    title: "Profile",
+                    tabBarIcon: ({ color }) => <User color={color} />,
+                }}
+            />
+        </Tabs>
+    );
+}
+
+
+this is (asset)/_layout
+import { Stack } from "expo-router";
+
+export default function AssetStack() {
+    return (
+        <Stack
+            screenOptions={{
+                headerTitleAlign: "center",
+            }}>
+            <Stack.Screen name='index' options={{ title: "Home" }} />
+            <Stack.Screen name='asset-details' options={{ title: "Asset Details" }} />
+            <Stack.Screen name='asset-list' options={{ title: "Asset List" }} />
+        </Stack>
+    );
+}
+
+this is (app)/(tabs)/index.tsx
+import { Link } from "expo-router";
+import { Text, View } from "react-native";
+
+export default function Index() {
+    return (
+        <View className='flex-1 items-center justify-center bg-white'>
+            <Text className='text-xl font-bold text-blue-500'>Welcome to Nativewind!</Text>
+            <Link href={"/(app)/(asset)/asset-list"}>
+                <Text>Go to asset</Text>
+            </Link>
+        </View>
+    );
+}
+
+so in this when navigating to the asset list its not showing tabs at bottom
+
+
+
+ async function downloadFile(url: string, folderName: string = "downloads"): Promise<string> {
+        try {
+            const destination = new Directory(Paths.cache, folderName);
+            destination.create();
+
+            const output = await File.downloadFileAsync(url, destination);
+
+            if (output.exists) {
+                console.log("Downloaded to:", output.uri);
+                return output.uri;
+            } else {
+                throw new Error("File download failed");
+            }
+        } catch (error) {
+            console.error("Download error:", error);
+            throw error;
+        }
+    }
+
+    <View className='flex flex-row justify-between items-center border-b border-gray-400 p-2'>
+                                <Text className='font-semibold text-[16px]'>Third Party Certificate</Text>
+                                <TouchableOpacity
+                                    className='bg-[#263f94] rounded-xl px-3 py-2 active:opacity-80'
+                                    onPress={() =>
+                                        downloadFile(
+                                            asset?.third_party_certificate[0].third_party_certificate as string,
+                                            "certificates"
+                                        )
+                                    }>
+                                    <Text className='text-white text-center font-semibold text-sm'>Download</Text>
+                                </TouchableOpacity>
+                            </View>
+
+    download not working and i am currently testing it in a web browser
+    Uncaught Error
+this.validatePath is not a function
