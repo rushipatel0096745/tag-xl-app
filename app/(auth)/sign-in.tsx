@@ -52,8 +52,8 @@ const SignIn = () => {
     };
 
     return (
-        <SafeAreaView className='flex-1 bg-gray-100 justify-center px-6'>
-            <View className='bg-white p-6 rounded-2xl shadow-md'>
+        <SafeAreaView className='flex-1 bg-gray-100 justify-center items-center px-6'>
+            <View className='bg-white p-6 rounded-2xl shadow-md'> 
                 <View className='mb-8'>
                     <Text className='text-gray-600 text-2xl text-center'>Sign in to continue</Text>
                 </View>

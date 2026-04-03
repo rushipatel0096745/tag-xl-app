@@ -28,7 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 AsyncStorage.getItem("user"),
             ]);
 
-            setSessionId(sessionId);
+            setSessionId((sessionId));
             setCompanyId(companyId);
             setUser(user ? JSON.parse(user) : null);
 
@@ -39,8 +39,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const logIn = async (companyId: string, sessionId: string, user: User) => {
-        await AsyncStorage.setItem("companyId", companyId);
-        await AsyncStorage.setItem("sessionId", sessionId);
+        await AsyncStorage.setItem("companyId", String(companyId));
+        await AsyncStorage.setItem("sessionId", String(sessionId));
         await AsyncStorage.setItem("user", JSON.stringify(user));
         setSessionId(sessionId);
         setCompanyId(companyId);

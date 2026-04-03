@@ -104,3 +104,18 @@ export const GetLocationList = async function (filter: Filter[] = [], show_all_r
     });
     return result;
 };
+
+export const CreateLocation = async function (name: string) {
+    const result = await clientFetch("/company/location/create", {
+        method: "POST",
+        headers: {
+            ...(await getAuthHeaders()),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            name: name,
+        }),
+    });
+
+    return result;
+};

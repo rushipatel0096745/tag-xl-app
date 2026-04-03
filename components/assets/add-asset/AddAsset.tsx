@@ -133,9 +133,8 @@ const AddAsset = () => {
     };
 
     return (
-        <SafeAreaProvider>
             <SafeAreaView className='flex-1'>
-                <View>
+                <View className="flex-1">
                     {currentStep === 1 && (
                         <Step1
                             next={nextStep}
@@ -182,7 +181,6 @@ const AddAsset = () => {
             )} */}
                 </View>
             </SafeAreaView>
-        </SafeAreaProvider>
     );
 };
 

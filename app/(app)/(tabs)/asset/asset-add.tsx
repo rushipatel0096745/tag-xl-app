@@ -4,7 +4,7 @@ import { View } from "react-native";
 
 const CreateAsset = () => {
     return (
-        <View>
+        <View className='flex-1'>
             <AddAsset />
         </View>
     );
