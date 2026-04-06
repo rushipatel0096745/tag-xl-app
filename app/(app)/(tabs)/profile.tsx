@@ -12,7 +12,7 @@ const Profile = () => {
                 <Text className='text-white text-center font-semibold text-lg'>Logout</Text>
             </TouchableOpacity>
 
-            <Link href={"/(app)/(tabs)/asset/asset-list"}>
+            <Link href={"/(app)/(tabs)/profile"}>
                 <Text>Go to asset</Text>
             </Link>
         </View>

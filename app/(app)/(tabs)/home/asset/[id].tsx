@@ -7,7 +7,7 @@ const AssetItemDetails = () => {
     const { id }: { id: string } = useLocalSearchParams();
 
     return (
-        <View className="flex-1">
+        <View className='flex-1'>
             <AssetDetails id={id} />
         </View>
     );

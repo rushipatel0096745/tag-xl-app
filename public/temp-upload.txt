@@ -1,0 +1,128 @@
+const requestCameraPermission = async () => {
+        const { status } = await Camera.requestCameraPermissionsAsync();
+        return status === "granted";
+    };
+
+    const handleChooseFromGallery = async () => {
+        setIsUploadModalOpen(false);
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsMultipleSelection: true,
+            quality: 0.8,
+        });
+        if (!result.canceled) {
+            const file: UploadedFile[] = result.assets.map((a) => ({
+                uri: a.uri,
+                name: a.fileName ?? `image_${Date.now()}.jpg`,
+                type: "image",
+                mimeType: a.mimeType ?? "image/jpeg",
+            }));
+            addFiles(file);
+        }
+    };
+
+    const handleTakePhoto = async () => {
+        setIsUploadModalOpen(false);
+        const granted = await requestCameraPermission();
+        if (!granted) {
+            Alert.alert("Permission required", "Camera access is needed to take photos.");
+            return;
+        }
+        const result = await ImagePicker.launchCameraAsync({
+            quality: 0.8,
+            allowsEditing: true,
+        });
+        if (!result.canceled) {
+            addFiles({
+                uri: result.assets[0].uri,
+                name: `photo_${Date.now()}.jpg`,
+                type: "image",
+                mimeType: "image/jpeg",
+            });
+        }
+    };
+
+    const handleChooseFile = async () => {
+        setIsUploadModalOpen(false);
+        const result = await DocumentPicker.getDocumentAsync({
+            type: "*/*",
+            multiple: true,
+            copyToCacheDirectory: true,
+        });
+        if (!result.canceled) {
+            const file: UploadedFile = result.assets.map((a) => ({
+                uri: a.uri,
+                name: a.name,
+                type: "file",
+                mimeType: a.mimeType,
+            }));
+            addFiles(file);
+        }
+    };
+
+    const addFiles = (newFile: UploadedFile) => {
+        // setUploadedFiles((prev) => {
+        //     const updated = [...prev, ...newFiles];
+        //     updateForm("attachments", updated);
+        //     return updated;
+        // });
+
+        setUploadedFile(newFile);
+        updateForm("image", newFile);
+    };
+
+    const removeFile = () => {
+        // setUploadedFiles((prev) => {
+        //     const updated = prev.filter((_, i) => i !== index);
+        //     updateForm("attachments", updated);
+        //     return updated;
+        // });
+        setUploadedFile(null);
+        updateForm("image", null);
+    };
+
+    <View className='gap-2'>
+                <Text className='text-[16px] font-semibold'>Attachments</Text>
+
+                {/* Uploaded previews */}
+
+                <View className='flex-row flex-wrap gap-2 mb-2'>
+                    <View className='relative'>
+                        {uploadedFile?.type === "image" ? (
+                            <Image
+                                source={{ uri: uploadedFile?.uri }}
+                                className='w-20 h-20 rounded-xl bg-gray-100'
+                                resizeMode='cover'
+                            />
+                        ) : (
+                            <View className='w-20 h-20 rounded-xl bg-blue-50 border border-blue-100 items-center justify-center gap-1'>
+                                <FileText size={24} color='#263f94' />
+                                <Text className='text-[10px] text-gray-500 px-1 text-center' numberOfLines={2}>
+                                    {uploadedFile?.name}
+                                </Text>
+                            </View>
+                        )}
+                        {/* Remove button */}
+                        <TouchableOpacity
+                            onPress={() => removeFile()}
+                            className='absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full items-center justify-center'>
+                            <X size={10} color='white' strokeWidth={3} />
+                        </TouchableOpacity>
+                    </View>
+                </View>
+
+                {/* Drop zone / trigger */}
+                <TouchableOpacity
+                    onPress={handleUploadPress}
+                    className='border-2 border-dashed border-[#263f94]/40 rounded-2xl py-8 items-center gap-3 active:opacity-70 active:bg-blue-50'>
+                    <View className='w-12 h-12 bg-[#263f94]/10 rounded-2xl items-center justify-center'>
+                        <Upload size={22} color='#263f94' />
+                    </View>
+                    <View className='items-center gap-1'>
+                        <Text className='font-semibold text-[#263f94]'>Add Image</Text>
+                        {/* <Text className='text-gray-400 text-xs'>Photo, image from gallery, or file</Text> */}
+                    </View>
+                </TouchableOpacity>
+            </View>
+
+i want ot change it for the single image or file

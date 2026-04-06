@@ -1,3 +1,5 @@
+// app/(app)/(tabs)/_layout.tsx
+
 import { Tabs } from "expo-router";
 import { Home, User } from "lucide-react-native";
 
@@ -5,7 +7,7 @@ export default function TabsLayout() {
     return (
         <Tabs screenOptions={{ headerShown: true }}>
             <Tabs.Screen
-                name='index'
+                name='home/index'
                 options={{
                     title: "Home",
                     tabBarIcon: ({ color }) => <Home color={color} />,
@@ -23,7 +25,7 @@ export default function TabsLayout() {
             />
 
             <Tabs.Screen
-                name='asset'
+                name='home/asset'
                 options={{
                     href: null,
                     headerShown: false,

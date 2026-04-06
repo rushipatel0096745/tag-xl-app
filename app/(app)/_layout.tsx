@@ -1,3 +1,5 @@
+// app/(app)/_layout.tsx
+
 import { useAuth } from "@/context/AuthContext";
 import { Redirect, Stack } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
@@ -18,8 +20,6 @@ export default function ProtectedLayout() {
     return (
         <Stack>
             <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-            {/* <Stack.Screen name='(tabs)/asset/asset-list' options={{ headerShown: false }} /> */}
         </Stack>
-        // <Slot />
     );
 }

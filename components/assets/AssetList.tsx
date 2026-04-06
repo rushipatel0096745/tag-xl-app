@@ -97,7 +97,7 @@ const AssetList = () => {
                 onPress={() => {
                     setSelectedId(item.id);
                     router.push({
-                        pathname: "/(app)/(tabs)/asset/[id]",
+                        pathname: "/(app)/(tabs)/home/asset/[id]",
                         params: { id: item.id },
                     } as Href);
                 }}

@@ -46,7 +46,7 @@ const Dashboard = () => {
         <View className='main mt-4 mx-3 flex flex-col justify-between gap-2'>
             <View className='flex-row flex-wrap justify-between '>
                 {Object.entries(dashboardData).map(([key, value]) => (
-                    <View className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl'>
+                    <View className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl' key={key}>
                         <View className='flex flex-col gap-1'>
                             <Text>{value}</Text>
                             <Text> {key.replace(/_/g, " ").replace(/\b\w/g, (c: any) => c.toUpperCase())}</Text>
@@ -59,14 +59,14 @@ const Dashboard = () => {
                 <TouchableOpacity
                     className='bg-[#263f94] rounded-xl p-2 mt-6 active:opacity-80'
                     onPress={() => {
-                        router.push("/asset/asset-add");
+                        router.push("/home/asset/asset-add");
                     }}>
                     <Text className='text-white text-center font-semibold text-sm'>Add Asset</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     className='bg-[#263f94] rounded-xl p-2 mt-6 active:opacity-80'
                     onPress={() => {
-                        router.push("/asset/asset-list");
+                        router.push("/home/asset/asset-list");
                     }}>
                     <Text className='text-white text-center font-semibold text-sm'>Asset List</Text>
                 </TouchableOpacity>

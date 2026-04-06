@@ -52,7 +52,7 @@ const SignIn = () => {
     };
 
     return (
-        <SafeAreaView className='flex-1 bg-gray-100 justify-center items-center px-6'>
+        <View className='flex-1 bg-gray-100 justify-center px-2'>
             <View className='bg-white p-6 rounded-2xl shadow-md'> 
                 <View className='mb-8'>
                     <Text className='text-gray-600 text-2xl text-center'>Sign in to continue</Text>
@@ -105,7 +105,7 @@ const SignIn = () => {
                     {loading && <ActivityIndicator className='absolute right-10 top-9' color={'#fff'}/>}
                 </View>
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 

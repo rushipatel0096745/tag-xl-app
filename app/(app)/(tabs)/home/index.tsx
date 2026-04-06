@@ -1,3 +1,5 @@
+// app/(app)/(tabs)/home/index.tsx
+
 import Dashboard from "@/components/assets/Dashboard";
 import { GetDashboardData } from "@/services/asset";
 import { useEffect } from "react";
@@ -22,11 +24,6 @@ export default function Index() {
 
     return (
         <View className='flex items-center justify-center bg-white'>
-            {/* <Text className='text-xl font-bold text-blue-500'>Welcome to Nativewind!</Text> */}
-            {/* <Link href={"/(app)/(tabs)/asset/asset-list"}>
-                <Text>Go to asset</Text>
-            </Link> */}
-
             <View>
                 <Dashboard />
             </View>

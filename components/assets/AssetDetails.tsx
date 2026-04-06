@@ -24,8 +24,8 @@ const AssetDetails = ({ id }: { id: string }) => {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [userRole, setUserRole] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
-    const [preUseCollapsed, setPreUseCollapsed] = useState(false);
-    const [maintenanceCollapsed, setMaintenanceCollapsed] = useState(false);
+    const [preUseCollapsed, setPreUseCollapsed] = useState(true);
+    const [maintenanceCollapsed, setMaintenanceCollapsed] = useState(true);
     const { user } = useAuth();
 
     async function fetchAsset() {
@@ -104,11 +104,11 @@ const AssetDetails = ({ id }: { id: string }) => {
                                 <View className='asset-info flex flex-col justify-between '>
                                     <Text className='text-sm text-gray-500'>Batch Code</Text>
                                     <Text>{asset?.batch_code}</Text>
-                                </View>{" "}
+                                </View>
                                 <View className='asset-info flex flex-col justify-between '>
                                     <Text className='text-sm text-gray-500'>UID Type</Text>
                                     <Text>{asset?.tag?.tag_type}</Text>
-                                </View>{" "}
+                                </View>
                                 <View className='asset-info flex flex-col justify-between '>
                                     <Text className='text-sm text-gray-500'>UID</Text>
                                     <Text>{asset?.tag?.uid}</Text>

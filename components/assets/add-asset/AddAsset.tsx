@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { View } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
+import Step3 from "./Step3";
+import Step4 from "./Step4";
 
 const AddAsset = () => {
     const [formData, setFormData] = useState({
@@ -12,11 +13,14 @@ const AddAsset = () => {
         name: "",
         location_id: "",
         batch_code: "",
-        image: null as null | File,
+        // image: null as null | File,
+        image: "" as any | null,
         manual_template_id: "",
         status: null,
-        oem_certificate: null as null | File,
-        third_party_certificate: null as null | File,
+        // oem_certificate: null as null | File,
+        oem_certificate: "" as any | null,
+        // third_party_certificate: null as null | File,
+        third_party_certificate: "" as any,
         third_party_start_date: "",
         third_party_expiry_date: "",
         pre_use_template_id: "",
@@ -28,11 +32,13 @@ const AddAsset = () => {
 
     const [errors, setErrors] = useState<any>({});
 
+    const [formError, setFormError] = useState("");
+
     const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpg", "image/jpeg"];
     const MAX_FILE_SIZE_MB = 5;
 
     const updateForm = function (name: string, value: any) {
-        if ((name === "oem_certificate" || name === "third_party_certificate") && value instanceof File) {
+        if ((name === "oem_certificate" || name === "third_party_certificate") && value) {
             if (!ALLOWED_IMAGE_TYPES.includes(value.type)) {
                 setErrors((prev: any) => ({
                     ...prev,
@@ -40,13 +46,13 @@ const AddAsset = () => {
                 }));
                 return;
             }
-            if (value.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-                setErrors((prev: any) => ({
-                    ...prev,
-                    [name]: `Upload File Less than ${MAX_FILE_SIZE_MB}MB`,
-                }));
-                return;
-            }
+            // if (value.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+            //     setErrors((prev: any) => ({
+            //         ...prev,
+            //         [name]: `Upload File Less than ${MAX_FILE_SIZE_MB}MB`,
+            //     }));
+            //     return;
+            // }
         }
 
         setFormData((prev) => ({
@@ -83,26 +89,32 @@ const AddAsset = () => {
         if (currentStep === 3) {
             if (!formData.oem_certificate) {
                 newErrors.oem_certificate = "OEM Certificate is required";
-            } else if (formData.oem_certificate instanceof File) {
+            } else {
                 if (!ALLOWED_IMAGE_TYPES.includes(formData.oem_certificate.type)) {
                     newErrors.oem_certificate = "Only PNG, JPG, or JPEG images are allowed";
-                } else if (formData.oem_certificate.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-                    newErrors.oem_certificate = `Upload File Less than ${MAX_FILE_SIZE_MB}MB`;
                 }
             }
 
             if (formData.third_party_certificate) {
-                if (formData.third_party_certificate instanceof File) {
-                    if (!ALLOWED_IMAGE_TYPES.includes(formData.third_party_certificate.type)) {
-                        newErrors.third_party_certificate = "Only PNG, JPG, or JPEG images are allowed";
-                    } else if (formData.third_party_certificate.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-                        newErrors.third_party_certificate = `Upload File Less than ${MAX_FILE_SIZE_MB}MB`;
-                    }
+                if (!ALLOWED_IMAGE_TYPES.includes(formData.third_party_certificate.type)) {
+                    newErrors.third_party_certificate = "Only PNG, JPG, or JPEG images are allowed";
                 }
-                if (!formData.third_party_start_date)
+
+                if (!formData.third_party_start_date) {
                     newErrors.third_party_start_date = "Third party start date required";
-                if (!formData.third_party_expiry_date)
+                }
+
+                if (!formData.third_party_expiry_date) {
                     newErrors.third_party_expiry_date = "Third party expiry date required";
+                }
+
+                if (
+                    formData.third_party_start_date &&
+                    formData.third_party_expiry_date &&
+                    new Date(formData.third_party_expiry_date) < new Date(formData.third_party_start_date)
+                ) {
+                    newErrors.third_party_expiry_date = "Expiry must be after start date";
+                }
             }
 
             if (
@@ -132,30 +144,64 @@ const AddAsset = () => {
         setCurrentStep((prevStep) => prevStep - 1);
     };
 
-    return (
-            <SafeAreaView className='flex-1'>
-                <View className="flex-1">
-                    {currentStep === 1 && (
-                        <Step1
-                            next={nextStep}
-                            updateForm={updateForm}
-                            validate={validate}
-                            errors={errors}
-                            formData={formData}
-                        />
-                    )}
+    const handleSave = async function () {
+        // const data = formData
+        // console.log(data)
+        // const assetFormData = new FormData();
+        // assetFormData.append("tag_id", formData.tag_id);
+        // assetFormData.append("name", formData.name);
+        // assetFormData.append("location_id", formData.location_id);
+        // assetFormData.append("batch_code", formData.batch_code);
+        // formData.image && assetFormData.append("image", formData.image);
+        // formData.manual_template_id && assetFormData.append("manual_template_id", formData.manual_template_id);
+        // assetFormData.append("status", String(Number(formData.status) || 0));
+        // assetFormData.append("oem_certificate", formData.oem_certificate);
+        // if (formData.third_party_certificate) {
+        //     assetFormData.append("third_party_certificate", formData.third_party_certificate);
+        //     assetFormData.append("third_party_start_date", formData.third_party_start_date);
+        //     assetFormData.append("third_party_expiry_date", formData.third_party_expiry_date);
+        // }
+        // assetFormData.append("pre_use_template_id", formData.pre_use_template_id);
+        // assetFormData.append("maintenance_template_id", formData.maintenance_template_id);
+        // formData.asset_pre_use_questions &&
+        //     assetFormData.append("asset_pre_use_questions", formData.asset_pre_use_questions);
+        // formData.asset_maintenance_questions &&
+        //     assetFormData.append("asset_maintenance_questions", formData.asset_maintenance_questions);
+        // console.log([...assetFormData.entries()]);
+        // const response = await CreateAsset(assetFormData);
+        // console.log("response for create asset: ", response);
+        // if (response?.success) {
+        //     router.push("/company-admin/asset?create=true");
+        //     return;
+        // }
+        // if (!response?.success && response?.error) {
+        //     setFormError(response?.error);
+        // }
+    };
 
-                    {currentStep === 2 && (
-                        <Step2
-                            prev={prevStep}
-                            next={nextStep}
-                            updateForm={updateForm}
-                            validate={validate}
-                            errors={errors}
-                            formData={formData}
-                        />
-                    )}
-                    {/*
+    return (
+        // <SafeAreaView className='flex-1'>
+        <View className='flex-1'>
+            {currentStep === 1 && (
+                <Step1
+                    next={nextStep}
+                    updateForm={updateForm}
+                    validate={validate}
+                    errors={errors}
+                    formData={formData}
+                />
+            )}
+
+            {currentStep === 2 && (
+                <Step2
+                    prev={prevStep}
+                    next={nextStep}
+                    updateForm={updateForm}
+                    validate={validate}
+                    errors={errors}
+                    formData={formData}
+                />
+            )}
             {currentStep === 3 && (
                 <Step3
                     prev={prevStep}
@@ -178,9 +224,9 @@ const AddAsset = () => {
                     handleSubmit={handleSave}
                     formError={formError}
                 />
-            )} */}
-                </View>
-            </SafeAreaView>
+            )}
+        </View>
+        // </SafeAreaView>
     );
 };
 
