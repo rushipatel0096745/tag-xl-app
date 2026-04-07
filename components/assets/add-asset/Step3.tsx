@@ -443,7 +443,7 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
                     )}
                 </View>
 
-                {/* ── Navigation ── */}
+                {/*  Navigation  */}
                 <View className='flex-row justify-between gap-2 mt-2'>
                     <Pressable
                         onPress={prev}

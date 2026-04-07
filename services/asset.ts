@@ -57,6 +57,19 @@ export const GetAsset = async function (id: number) {
     return result;
 };
 
+export const CreateAsset = async function (formData: FormData) {
+    const result = await clientFetch("/company/asset/create", {
+        method: "POST",
+        headers: {
+            ...(await getAuthHeaders()),
+            // "Content-Type": "application/json",
+        },
+        body: formData
+    });
+
+    return result;
+};
+
 export const CreateTag = async function (uid: string, tag_type: string) {
     const result = await clientFetch("/company/tag/create", {
         method: "POST",

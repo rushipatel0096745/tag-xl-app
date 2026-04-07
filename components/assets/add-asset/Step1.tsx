@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import NewTagModal from "./NewTagModal";
+import { CheckTagAssigned } from "@/services/asset";
 
 type TagType = "RFID" | "QR" | "Manual" | "";
 
@@ -32,25 +33,24 @@ const Step1 = ({ next, updateForm, validate, errors, formData }: Props) => {
     const closeModal = () => setIsModalOpen(false);
 
     async function handleSave() {
-        next();
-        // if (!validate()) return;
+        if (!validate()) return;
 
-        // const checkAssigned = await CheckTagAssigned(tagId || formData.uid);
+        const checkAssigned = await CheckTagAssigned(tagId || formData.uid);
 
-        // if (checkAssigned.has_error && checkAssigned.error_code == "RECORD_ALREADY_USED") {
-        //     setAssignError(checkAssigned.message);
-        //     return;
-        // }
+        if (checkAssigned.has_error && checkAssigned.error_code == "RECORD_ALREADY_USED") {
+            setAssignError(checkAssigned.message);
+            return;
+        }
 
-        // if (checkAssigned.has_error && checkAssigned.error_code == "RECORD_NOT_FOUND") {
-        //     openModal();
-        //     return;
-        // }
+        if (checkAssigned.has_error && checkAssigned.error_code == "RECORD_NOT_FOUND") {
+            openModal();
+            return;
+        }
 
-        // if (!checkAssigned.has_error) {
-        //     updateForm("tag_id", checkAssigned.tag.id);
-        //     next();
-        // }
+        if (!checkAssigned.has_error) {
+            updateForm("tag_id", checkAssigned.tag.id);
+            next();
+        }
     }
 
     return (

@@ -19,3 +19,15 @@ export interface PreUseTemplteListItem {
         multiselect_value?: Record<string, string>;
     }[];
 }
+
+export interface MaintenanceTemplteListItem {
+    id: number;
+    title: string;
+    maintenance_frequency: number;
+    questions: {
+        id: number;
+        question: string;
+        type: string;
+        multiselect_value?: Record<string, string>;
+    }[];
+}

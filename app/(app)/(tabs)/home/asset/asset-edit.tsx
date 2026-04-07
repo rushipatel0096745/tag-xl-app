@@ -1,12 +1,16 @@
+import AssetEdit from "@/components/assets/AssetEdit";
+import { useLocalSearchParams } from "expo-router";
 import React from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 
-const AssetEdit = () => {
+const AssetEditView = () => {
+    const { id }: { id: string } = useLocalSearchParams();
+
     return (
-        <View>
-            <Text>AssetEdit</Text>
+        <View className="flex-1">
+            <AssetEdit id={id} />
         </View>
     );
 };
 
-export default AssetEdit;
+export default AssetEditView;

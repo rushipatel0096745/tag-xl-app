@@ -1,13 +1,15 @@
 import { useAuth } from "@/context/AuthContext";
-import { GetAsset } from "@/services/asset";
+import { GetAsset, GetLocationList } from "@/services/asset";
 import { AssetDetail, Question } from "@/types/Aseet";
-import { Directory, File, Paths } from "expo-file-system";
 import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Linking, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
+import * as FileSystem from "expo-file-system/legacy";
+import { router } from "expo-router";
 import { LayoutAnimation, Platform, UIManager } from "react-native";
+const { StorageAccessFramework } = FileSystem;
 
 // Enable for Android
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -26,6 +28,7 @@ const AssetDetails = ({ id }: { id: string }) => {
     const [loading, setLoading] = useState(true);
     const [preUseCollapsed, setPreUseCollapsed] = useState(true);
     const [maintenanceCollapsed, setMaintenanceCollapsed] = useState(true);
+    const [locations, setLocations] = useState()
     const { user } = useAuth();
 
     async function fetchAsset() {
@@ -49,30 +52,90 @@ const AssetDetails = ({ id }: { id: string }) => {
         }
     }
 
-    async function downloadFile(url: string, folderName: string = "downloads"): Promise<string> {
-        try {
-            const destination = new Directory(Paths.cache, folderName);
-            destination.create();
 
-            const output = await File.downloadFileAsync(url, destination);
 
-            if (output.exists) {
-                console.log("Downloaded to:", output.uri);
-                return output.uri;
-            } else {
-                throw new Error("File download failed");
-            }
-        } catch (error) {
-            console.error("Download error:", error);
-            throw error;
-        }
-    }
+    // async function downloadFile(url: string, folderName: string = "downloads"): Promise<string> {
+    //     try {
+    //         const destination = new Directory(Paths.document, folderName);
+
+    //         if (!destination.exists) {
+    //             destination.create();
+    //         }
+
+    //         const fileName = url.split("/").pop() || `file_${Date.now()}`;
+    //         const file = new File(destination, fileName);
+
+    //         const output = await File.downloadFileAsync(url, file, {
+    //             idempotent: true,
+    //         });
+
+    //         console.log("Downloaded to:", output.uri);
+    //         Alert.alert("File", "File downloaded");
+
+    //         return output.uri;
+    //     } catch (error) {
+    //         console.error("Download error:", error);
+    //         throw error;
+    //     }
+    // }
+
+    // async function downloadFile(url: string) {
+    //     try {
+    //         const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+
+    //         if (!permissions.granted) {
+    //             alert("Permission denied");
+    //             return;
+    //         }
+
+    //         const directoryUri = permissions.directoryUri;
+
+    //         const fileName = url.split("/").pop() || `file_${Date.now()}`;
+
+    //         const tempFile = FileSystem.documentDirectory + fileName;
+
+    //         const downloaded = await FileSystem.downloadAsync(url, tempFile);
+
+    //         const fileBase64 = await FileSystem.readAsStringAsync(downloaded.uri, {
+    //             encoding: FileSystem.EncodingType.Base64,
+    //         });
+
+    //         const newFileUri = await StorageAccessFramework.createFileAsync(directoryUri, fileName, "image/jpeg");
+
+    //         await FileSystem.writeAsStringAsync(newFileUri, fileBase64, {
+    //             encoding: FileSystem.EncodingType.Base64,
+    //         });
+
+    //         alert("Saved to Downloads");
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // }
+
+    const downloadFile = (url: string) => {
+        Alert.alert("Download File", "Browser is required to open this document", [
+            {
+                text: "Cancel",
+                style: "cancel",
+            },
+            {
+                text: "Open in Browser",
+                onPress: async () => {
+                    try {
+                        await Linking.openURL(url);
+                    } catch (err) {
+                        console.error("Failed to open URL:", err);
+                    }
+                },
+            },
+        ]);
+    };
 
     useEffect(() => {
         fetchAsset();
         setUserRole(user?.role.permission.asset ?? []);
     }, []);
-    
+
     return (
         <SafeAreaProvider>
             <SafeAreaView className='flex-1 m-2'>
@@ -91,11 +154,19 @@ const AssetDetails = ({ id }: { id: string }) => {
                         <View className='flex flex-col justify-between border rounded-xl border-gray-400'>
                             <View className='flex flex-row justify-between items-center border-b border-gray-400 py-2 px-4'>
                                 <Text className='font-semibold text-[16px]'>Details</Text>
-                                <TouchableOpacity className='bg-[#263f94] rounded-xl px-3 py-2 active:opacity-80'>
+                                <TouchableOpacity
+                                    className='bg-[#263f94] rounded-xl px-3 py-2 active:opacity-80'
+                                    onPress={() => {
+                                        router.push({
+                                            pathname: "/(app)/(tabs)/home/asset/asset-edit",
+                                            params: {
+                                                id: id,
+                                            },
+                                        });
+                                    }}>
                                     <Text className='text-white text-center font-semibold text-sm'>Edit</Text>
                                 </TouchableOpacity>
                             </View>
-
                             <View className='flex flex-col justify-between gap-4 py-2 px-4'>
                                 <View className='asset-info flex flex-col justify-between '>
                                     <Text className='text-sm text-gray-500'>Asset Name</Text>
@@ -124,16 +195,19 @@ const AssetDetails = ({ id }: { id: string }) => {
                         <View className='flex flex-col justify-between border rounded-xl border-gray-400'>
                             <View className='flex flex-row justify-between items-center border-b border-gray-400 py-2 px-4'>
                                 <Text className='font-semibold text-[16px]'>Third Party Certificate</Text>
-                                <TouchableOpacity
-                                    className='bg-[#263f94] rounded-xl px-3 py-2 active:opacity-80'
-                                    onPress={() =>
-                                        downloadFile(
-                                            asset?.third_party_certificate[0].third_party_certificate as string,
-                                            "certificates"
-                                        )
-                                    }>
-                                    <Text className='text-white text-center font-semibold text-sm'>Download</Text>
-                                </TouchableOpacity>
+
+                                {asset?.third_party_certificate && asset?.third_party_certificate.length > 0 && (
+                                    <TouchableOpacity
+                                        className='bg-[#263f94] rounded-xl px-3 py-2 active:opacity-80'
+                                        onPress={() =>
+                                            downloadFile(
+                                                ("https://api.tagxl.com/" +
+                                                    asset?.third_party_certificate[0].third_party_certificate) as string
+                                            )
+                                        }>
+                                        <Text className='text-white text-center font-semibold text-sm'>Download</Text>
+                                    </TouchableOpacity>
+                                )}
                             </View>
 
                             <View className='flex flex-col flex-wrap justify-between gap-2 py-2 px-4'>
@@ -151,7 +225,9 @@ const AssetDetails = ({ id }: { id: string }) => {
                                         </Text>
                                     </View>
                                 </View>
-                                <Text className='text-blue-700 underline'>View all certificates</Text>
+                                {asset?.third_party_certificate && asset?.third_party_certificate.length > 0 && (
+                                    <Text className='text-blue-700 underline'>View all certificates</Text>
+                                )}
                             </View>
                         </View>
 
@@ -161,12 +237,10 @@ const AssetDetails = ({ id }: { id: string }) => {
                                 <Text className='font-semibold text-[16px]'>OEM Certificate</Text>
                                 <TouchableOpacity
                                     className='bg-[#263f94] rounded-xl px-3 py-2 active:opacity-80'
-                                    onPress={() =>
-                                        downloadFile(
-                                            asset?.third_party_certificate[0].third_party_certificate as string,
-                                            "certificates"
-                                        )
-                                    }>
+                                    onPress={() => {
+                                        const download_url = "https://api.tagxl.com/" + asset?.oem_certificate;
+                                        downloadFile(download_url as string);
+                                    }}>
                                     <Text className='text-white text-center font-semibold text-sm'>Download</Text>
                                 </TouchableOpacity>
                             </View>

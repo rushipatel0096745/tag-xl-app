@@ -36,6 +36,7 @@ type UploadedFile = {
     mimeType?: string;
 } | null;
 
+
 export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Props) => {
     const [locations, setLocations] = useState<Location[]>([]);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
@@ -166,9 +167,9 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
     };
 
     async function handleSave() {
-        // console.log("Form Data Submitted:", formData);
-        // console.log("image: ", uploadedFile);
-        // if (!validate()) return;
+        console.log("Form Data Submitted:", formData);
+        console.log("image: ", uploadedFile);
+        if (!validate()) return;
         next();
     }
 

@@ -1,7 +1,7 @@
 import Dropdown from "@/components/common/Dropdown";
 import NativeDropdown from "@/components/common/NativeDropdown";
-import { GetPreUseTemplateAssetList } from "@/services/templates";
-import { PreUseTemplteListItem } from "@/types/Templates";
+import { GetMaintenanceTemplateAssetList, GetPreUseTemplateAssetList } from "@/services/templates";
+import { MaintenanceTemplteListItem, PreUseTemplteListItem } from "@/types/Templates";
 import { Checkbox } from "expo-checkbox";
 import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -26,8 +26,8 @@ type QuestionCreate = {
     multiselect_value?: Record<string, string> | null;
 };
 
-const PreUseTemplate = ({ formData, updateForm, error }: Props) => {
-    const [preUseTempList, setPreUseTempList] = useState<PreUseTemplteListItem[]>([]);
+const MaintenanceTemplate = ({ formData, updateForm, error }: Props) => {
+    const [preUseTempList, setPreUseTempList] = useState<MaintenanceTemplteListItem[]>([]);
     const [allQuesions, setAllQuestions] = useState<Question[]>([]);
 
     const typeOptions = [
@@ -110,7 +110,7 @@ const PreUseTemplate = ({ formData, updateForm, error }: Props) => {
     }
 
     function handleSelection(text: string | number) {
-        updateForm("pre_use_template_id", text);
+        updateForm("maintenance_template_id", text);
         const template = preUseTempList.find((temp) => temp.id === Number(text));
 
         if (template) {
@@ -118,18 +118,18 @@ const PreUseTemplate = ({ formData, updateForm, error }: Props) => {
         }
     }
 
-    async function fetchPreUseTemplates() {
-        const result = await GetPreUseTemplateAssetList();
+    async function fetchMaintenanceTemplates() {
+        const result = await GetMaintenanceTemplateAssetList();
         console.log("Manual template", result);
-        setPreUseTempList(result?.pre_use_templates);
+        setPreUseTempList(result?.maintenance_templates);
     }
 
     useEffect(() => {
-        fetchPreUseTemplates();
+        fetchMaintenanceTemplates();
     }, []);
 
     useEffect(() => {
-        console.log("pre use questions: ", newQuestions);
+        console.log("maintenance questions: ", newQuestions);
     }, [newQuestions]);
 
     const renderItem = ({ item, drag, isActive, getIndex }: any) => {
@@ -156,26 +156,26 @@ const PreUseTemplate = ({ formData, updateForm, error }: Props) => {
     };
 
     return (
-        <View className='flex-col gap-3 p-3 border border-gray-400 rounded-xl bg-white'>
-            <Text className='text-[16px] font-semibold'>Pre Use Check Template</Text>
+        <View className='flex-col justify-between gap-3 p-3 border border-gray-400 rounded-xl bg-white'>
+            <Text className='text-[16px] font-semibold'>Maintenance Check Template</Text>
 
             <Dropdown
                 onChange={(text: string | number) => handleSelection(text)}
                 options={preUseTempList}
                 labelKey='title'
                 valueKey='id'
-                value={formData.pre_use_template_id}
-                placeholder='Select Pre Use Check Template'
+                value={formData.maintenance_template_id}
+                placeholder='Select Maintenance Check Template'
             />
-            {error.pre_use_template_id && (
+            {error.maintenance_template_id && (
                 <View>
-                    <Text className='text-red-500'>{error.pre_use_template_id}</Text>
+                    <Text className='text-red-500'>{error.maintenance_template_id}</Text>
                 </View>
             )}
 
             {allQuesions.length !== 0 && (
                 <View className='border p-4 mt-1 border-gray-400 rounded-xl bg-white'>
-                    <Text className='text-lg font-semibold'>All Pre Use Check Questions</Text>
+                    <Text className='text-lg font-semibold'>All Maintenance Check Questions</Text>
 
                     {allQuesions?.map((q) => {
                         return (
@@ -243,29 +243,6 @@ const PreUseTemplate = ({ formData, updateForm, error }: Props) => {
                 </View>
             )}
 
-            {/* <View className='border p-2 mt-1 border-gray-400 rounded-xl'>
-                {newQuestions.length !== 0 && (
-                    <View>this is not worth it i guess
-                        <Text className='text-lg font-semibold p-2'>New Added Questions</Text>
-                        {newQuestions.map((q, index) => (
-                            <View
-                                className='flex flex-row items-center gap-2 border border-gray-500 rounded-xl p-2'
-                                key={index}>
-                                <View className='flex flex-row items-center gap-2'>
-                                    <Text>{q.question} </Text>
-                                    <Text>Type: {q.type} </Text>
-                                </View>
-                                <Pressable
-                                    onPress={() => deleteQuestion(index)}
-                                    className='bg-red-500 rounded-xl py-3 px-4 items-center'>
-                                    <Text className='text-white text-[14px] font-medium'>Delete</Text>
-                                </Pressable>
-                            </View>
-                        ))}
-                    </View>
-                )}
-            </View> */}
-
             <View className='border p-2 mt-1 border-gray-400 rounded-xl'>
                 {newQuestions.length !== 0 && (
                     <>
@@ -276,7 +253,6 @@ const PreUseTemplate = ({ formData, updateForm, error }: Props) => {
                             keyExtractor={(item, index) => index.toString()}
                             renderItem={renderItem}
                             onDragEnd={({ data }) => setNewQuestions(data)}
-                            scrollEnabled={false} 
                         />
                     </>
                 )}
@@ -353,7 +329,7 @@ const PreUseTemplate = ({ formData, updateForm, error }: Props) => {
     );
 };
 
-export default PreUseTemplate;
+export default MaintenanceTemplate;
 
 const styles = StyleSheet.create({
     container: {
