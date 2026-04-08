@@ -64,7 +64,7 @@ export const CreateAsset = async function (formData: FormData) {
             ...(await getAuthHeaders()),
             // "Content-Type": "application/json",
         },
-        body: formData
+        body: formData,
     });
 
     return result;
@@ -86,6 +86,19 @@ export const CreateTag = async function (uid: string, tag_type: string) {
                 },
             ],
         }),
+    });
+
+    return result;
+};
+
+export const UnassignTag = async function (data: any) {
+    const result = await clientFetch("/company/tag/unassigned-asset", {
+        method: "POST",
+        headers: {
+            ...(await getAuthHeaders()),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
     });
 
     return result;

@@ -2,7 +2,7 @@ import Dropdown from "@/components/common/Dropdown";
 import { GetManualTemplateAssetList } from "@/services/templates";
 import { ManualTemplateListItem } from "@/types/Templates";
 import React, { useEffect, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import MaintenanceTemplate from "./MaintenanceTemplate";
 import PreUseTemplate from "./PreUseTemplate";
@@ -80,16 +80,16 @@ const Step4 = ({ next, prev, updateForm, validate, formData, handleSubmit, error
 
                     {/* Navigation */}
                     <View className='flex-row justify-between gap-2 mt-2'>
-                        <Pressable
-                            onPress={prev}
-                            className='py-2.5 px-3.5 border border-[#263f94] rounded-xl justify-center items-center h-9.5'>
-                            <Text className='text-[#263f94] text-[14px] font-medium'>Back</Text>
-                        </Pressable>
-                        <Pressable
-                            onPress={handleSave}
-                            className='py-2.5 px-3.5 bg-[#263f94] border border-[#263f94] rounded-xl justify-center items-center h-9.5'>
-                            <Text className='text-white text-[14px] font-medium'>Continue</Text>
-                        </Pressable>
+                        <TouchableOpacity className='py-2.5 px-3.5 border border-[#263f94] rounded-xl justify-center items-center h-9.5'>
+                            <Pressable onPress={prev}>
+                                <Text className='text-[#263f94] text-[14px] font-medium'>Back</Text>
+                            </Pressable>
+                        </TouchableOpacity>
+                        <TouchableOpacity className='bg-[#263f94] rounded-xl py-3 px-4 items-center self-end'>
+                            <Pressable onPress={handleSave}>
+                                <Text className='text-white text-[14px] font-medium'>Continue</Text>
+                            </Pressable>
+                        </TouchableOpacity>
                     </View>
                 </View>
                 {/* </View> */}

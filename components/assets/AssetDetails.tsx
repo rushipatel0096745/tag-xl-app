@@ -246,7 +246,7 @@ const AssetDetails = ({ id }: { id: string }) => {
                             </View>
                         </View>
 
-                        {/* Pre-use check templater */}
+                        {/* Pre-use check template */}
                         <View className='flex flex-col justify-between border rounded-xl border-gray-400'>
                             <View className='flex flex-row justify-between items-center py-2 px-4'>
                                 <View>

@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
-import NewTagModal from "./NewTagModal";
 import { CheckTagAssigned } from "@/services/asset";
+import React, { useState } from "react";
+import { Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
+import NewTagModal from "./NewTagModal";
 
 type TagType = "RFID" | "QR" | "Manual" | "";
 
@@ -121,17 +121,19 @@ const Step1 = ({ next, updateForm, validate, errors, formData }: Props) => {
             </View>
 
             {/* Error Message */}
-            {assignError ? (
+            {assignError && (
                 <View className='bg-yellow-400 p-2 rounded-md mb-3'>
                     <Text className='text-amber-900 text-[14px]'>{assignError}</Text>
                 </View>
-            ) : null}
+            )}
 
             {/* Button */}
             <View>
-                <Pressable onPress={handleSave} className='bg-[#263f94] rounded-xl py-3 px-4 items-center self-end'>
-                    <Text className='text-white text-[14px] font-medium'>Continue</Text>
-                </Pressable>
+                <TouchableOpacity className='bg-[#263f94] rounded-xl py-3 px-4 items-center self-end'>
+                    <Pressable onPress={handleSave}>
+                        <Text className='text-white text-[14px] font-medium'>Continue</Text>
+                    </Pressable>
+                </TouchableOpacity>
             </View>
         </View>
     );

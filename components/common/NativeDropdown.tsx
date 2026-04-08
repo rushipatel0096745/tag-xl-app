@@ -8,12 +8,16 @@ type Option = {
 };
 
 type Props = {
-    value?: string;
-    data: Option[];
+    value?: string | number;
+    data: any;
     onChange?: (item: string) => void;
+    labelField?: string;
+    valueField?: string;
+    placeholder?: string;
+    readonly?: boolean;
 };
 
-const NativeDropdown = ({ value, data, onChange }: Props) => {
+const NativeDropdown = ({ value, data, onChange, labelField, valueField, placeholder }: Props) => {
     const [localValue, setLocalValue] = useState(value ?? "");
 
     const handleChange = (item: Option) => {
@@ -28,11 +32,12 @@ const NativeDropdown = ({ value, data, onChange }: Props) => {
                 selectedTextStyle={styles.selectedText}
                 itemTextStyle={styles.itemText}
                 data={data}
-                labelField='label'
-                valueField='value'
-                value={localValue}
+                labelField={labelField ?? "label"}
+                valueField={valueField ?? "value"}
+                value={value ?? localValue}
                 onChange={handleChange}
                 search={false}
+                placeholder={placeholder}
             />
         </View>
     );
@@ -42,8 +47,9 @@ export default NativeDropdown;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        justifyContent: "center",
+        // flex: 1,
+        // justifyContent: "center",
+        width: "100%"
     },
     dropdown: {
         height: 48,

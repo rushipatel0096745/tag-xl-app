@@ -112,7 +112,7 @@ const AssetList = () => {
             <SafeAreaView className='flex-1'>
                 {errors.permission && <Text className='text-red-500'>{errors.permission}</Text>}
                 {loading ? (
-                    <View className='flex-1 justify-center items-center'>
+                    <View className='flex flex-row justify-center items-center'>
                         <ActivityIndicator size='large' />
                     </View>
                 ) : (

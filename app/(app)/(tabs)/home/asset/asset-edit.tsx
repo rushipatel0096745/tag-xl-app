@@ -1,15 +1,17 @@
 import AssetEdit from "@/components/assets/AssetEdit";
+import AppScreen from "@/components/common/AppScreen";
 import { useLocalSearchParams } from "expo-router";
 import React from "react";
-import { View } from "react-native";
 
 const AssetEditView = () => {
     const { id }: { id: string } = useLocalSearchParams();
 
     return (
-        <View className="flex-1">
+        // <View className="flex-1">
+        <AppScreen scroll>
             <AssetEdit id={id} />
-        </View>
+        </AppScreen>
+        // </View>
     );
 };
 
