@@ -45,14 +45,97 @@ const Dashboard = () => {
     return (
         <View className='main mt-4 mx-3 flex flex-col justify-between gap-2'>
             <View className='flex-row flex-wrap justify-between '>
-                {Object.entries(dashboardData).map(([key, value]) => (
+                {/* {Object.entries(dashboardData).map(([key, value]) => (
                     <View className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl' key={key}>
                         <View className='flex flex-col gap-1'>
-                            <Text>{value}</Text>
-                            <Text> {key.replace(/_/g, " ").replace(/\b\w/g, (c: any) => c.toUpperCase())}</Text>
+                            <Text className='text-2xl font-bold text-[#263f94]'>{value}</Text>
+                            <Text className='text-lg'>
+                                {" "}
+                                {key.replace(/_/g, " ").replace(/\b\w/g, (c: any) => c.toUpperCase())}
+                            </Text>
                         </View>
                     </View>
-                ))}
+                ))} */}
+                <TouchableOpacity
+                    className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl'
+                    onPress={() => router.push("/(app)/(tabs)/home/asset/asset-list")}>
+                    <View className='flex flex-col gap-1'>
+                        <Text className='text-2xl font-bold text-[#263f94]'>{dashboardData.total_assets}</Text>
+                        <Text className='text-lg'>Total Assets</Text>
+                    </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl'
+                    onPress={() =>
+                        router.push({
+                            pathname: "/(app)/(tabs)/home/alerts/alert-list",
+                            params: { type: "maintenance-check-due" },
+                        })
+                    }>
+                    <View className='flex flex-col gap-1'>
+                        <Text className='text-2xl font-bold text-[#263f94]'>{dashboardData.total_maintenance_due}</Text>
+                        <Text className='text-lg'>Maintenance Check Due</Text>
+                    </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl'
+                    onPress={() =>
+                        router.push({
+                            pathname: "/(app)/(tabs)/home/alerts/alert-list",
+                            params: { type: "recertification-needed" },
+                        })
+                    }>
+                    <View className='flex flex-col gap-1'>
+                        <Text className='text-2xl font-bold text-[#263f94]'>
+                            {dashboardData.total_certificate_expiry}
+                        </Text>
+                        <Text className='text-lg'>Recertification Needed</Text>
+                    </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl'
+                    onPress={() =>
+                        router.push({
+                            pathname: "/(app)/(tabs)/home/alerts/alert-list",
+                            params: { type: "asset-in-maintenance" },
+                        })
+                    }>
+                    <View className='flex flex-col gap-1'>
+                        <Text className='text-2xl font-bold text-[#263f94]'>{dashboardData.total_maintenance}</Text>
+                        <Text className='text-lg'>Asset In Maintenance</Text>
+                    </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl'
+                    onPress={() =>
+                        router.push({
+                            pathname: "/(app)/(tabs)/home/alerts/alert-list",
+                            params: { type: "asset-failure" },
+                        })
+                    }>
+                    <View className='flex flex-col gap-1'>
+                        <Text className='text-2xl font-bold text-[#263f94]'>{dashboardData.total_failures}</Text>
+                        <Text className='text-lg'>Asset Failure</Text>
+                    </View>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl'
+                    onPress={() =>
+                        router.push({
+                            pathname: "/(app)/(tabs)/home/alerts/alert-list",
+                            params: { type: "all" },
+                        })
+                    }>
+                    <View className='flex flex-col gap-1'>
+                        <Text className='text-2xl font-bold text-[#263f94]'>{dashboardData.total_alerts}</Text>
+                        <Text className='text-lg'> Total Alerts</Text>
+                    </View>
+                </TouchableOpacity>
             </View>
 
             <View className='action-btn'>
@@ -61,14 +144,14 @@ const Dashboard = () => {
                     onPress={() => {
                         router.push("/home/asset/asset-add");
                     }}>
-                    <Text className='text-white text-center font-semibold text-sm'>Add Asset</Text>
+                    <Text className='text-white text-center font-semibold text-xl'>Add Asset</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     className='bg-[#263f94] rounded-xl p-2 mt-6 active:opacity-80'
                     onPress={() => {
                         router.push("/home/asset/asset-list");
                     }}>
-                    <Text className='text-white text-center font-semibold text-sm'>Asset List</Text>
+                    <Text className='text-white text-center font-semibold text-xl'>Asset List</Text>
                 </TouchableOpacity>
             </View>
         </View>

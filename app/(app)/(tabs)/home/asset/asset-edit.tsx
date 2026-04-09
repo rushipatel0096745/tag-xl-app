@@ -1,10 +1,11 @@
 import AssetEdit from "@/components/assets/AssetEdit";
 import AppScreen from "@/components/common/AppScreen";
 import { useLocalSearchParams } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 
 const AssetEditView = () => {
     const { id }: { id: string } = useLocalSearchParams();
+    const [loading, setLoading] = useState(false);
 
     return (
         // <View className="flex-1">

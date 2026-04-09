@@ -7,7 +7,7 @@ export default function AuthLayout() {
     if (isLoading) return null;
 
     if (sessionId) {
-        return <Redirect href={"/(app)/(tabs)"} />;
+        return <Redirect href={"/(app)/(tabs)/home"} />;
     }
 
     return <Stack screenOptions={{ headerShown: false }} />;

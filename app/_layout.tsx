@@ -10,6 +10,9 @@ export default function RootLayout() {
         <AuthProvider>
             <Slot />
         </AuthProvider>
-        // </GestureHandlerRootView>
     );
+}
+
+{
+    /* </GestureHandlerRootView> */
 }

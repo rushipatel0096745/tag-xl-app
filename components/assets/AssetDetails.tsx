@@ -42,7 +42,7 @@ const AssetDetails = ({ id }: { id: string }) => {
             }
 
             if (!result.has_error) {
-                console.log(result.asset);
+                console.log(result.asset, null, 2);
                 setAsset(result?.asset);
             }
         } catch (err) {
@@ -149,7 +149,7 @@ const AssetDetails = ({ id }: { id: string }) => {
                                 contentFit='scale-down'
                             />
                         </View>
-
+{/* i want to render different lists from one parnet component based on search param  coming from other components in react native expo*/}
                         {/* asset-info */}
                         <View className='flex flex-col justify-between border rounded-xl border-gray-400'>
                             <View className='flex flex-row justify-between items-center border-b border-gray-400 py-2 px-4'>

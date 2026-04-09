@@ -358,7 +358,7 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
 
             {/* ── Navigation ── */}
             <View className='flex-row justify-between gap-2 mt-2'>
-                <TouchableOpacity className='py-2.5 px-3.5 border border-[#263f94] rounded-xl justify-center items-center h-[38px]'>
+                <TouchableOpacity className='py-2.5 px-3.5 border border-[#263f94] rounded-xl justify-center items-center h-9.5'>
                     <Pressable onPress={prev}>
                         <Text className='text-[#263f94] text-[14px] font-medium'>Back</Text>
                     </Pressable>

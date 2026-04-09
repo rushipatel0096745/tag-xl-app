@@ -20,9 +20,11 @@ type Props = {
 const NativeDropdown = ({ value, data, onChange, labelField, valueField, placeholder }: Props) => {
     const [localValue, setLocalValue] = useState(value ?? "");
 
-    const handleChange = (item: Option) => {
-        setLocalValue(item.value);
-        onChange?.(item.value);
+    const handleChange = (item: any) => {
+        const value = item[valueField ?? "value"];
+
+        setLocalValue(value);
+        onChange?.(value);
     };
 
     return (
@@ -49,7 +51,7 @@ const styles = StyleSheet.create({
     container: {
         // flex: 1,
         // justifyContent: "center",
-        width: "100%"
+        width: "100%",
     },
     dropdown: {
         height: 48,

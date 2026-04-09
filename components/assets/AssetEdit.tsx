@@ -1,4 +1,4 @@
-import { CreateLocation, GetAsset, GetLocationList } from "@/services/asset";
+import { CreateLocation, GetAsset, GetLocationList, UpdateAsset } from "@/services/asset";
 import {
     GetMaintenanceTemplateAssetList,
     GetManualTemplateAssetList,
@@ -12,7 +12,17 @@ import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { CameraIcon, FolderOpen, ImageIcon } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, Linking, Modal, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    ActivityIndicator,
+    Alert,
+    Linking,
+    Modal,
+    Pressable,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
 import NativeDatePickerInput from "../common/NativeDateTimePicker";
 import NativeDropdown from "../common/NativeDropdown";
 import UnassignTagModal from "./UnassignTagModal";
@@ -25,11 +35,17 @@ type UploadedFile = {
 
 type Location = { id: number; name: string };
 
-const AssetEdit = ({ id }: { id: string }) => {
+type Props = {
+    id: string;
+    setUpdateLoading?: (val: boolean) => void;
+};
+
+const AssetEdit = ({ id }: Props) => {
     const [asset, setAsset] = useState<AssetDetail>();
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [userRole, setUserRole] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
+    const [update_loading, setUpdateLoading] = useState(false);
     const [locations, setLocations] = useState<Location[]>([]);
     const [manualTempList, setManualTempList] = useState<ManualTemplateListItem[]>([]);
     const [preUseTemplateList, setPreUseTemplateList] = useState<PreUseTemplteListItem[]>([]);
@@ -56,7 +72,7 @@ const AssetEdit = ({ id }: { id: string }) => {
     const [assignError, setAssignError] = useState("");
     const [formData, setFormData] = useState({
         name: asset?.name ?? "",
-        location_id: asset?.location ?? (null as number | null),
+        location_id: asset?.location?.id ?? null,
         batch_code: asset?.batch_code ?? "",
         image: asset?.image ?? ("" as any | null),
         manual_template_id: String(asset?.manual_template?.id) ?? "",
@@ -94,10 +110,57 @@ const AssetEdit = ({ id }: { id: string }) => {
     }
 
     async function handleSave() {
-        if(!validate()) return
+        if (!validate()) return;
+        try {
+            setUpdateLoading(true);
 
-        const formData = new FormData();
-        
+            const assetData = new FormData();
+            assetData.append("name", formData.name);
+            assetData.append("batch_code", formData.batch_code);
+            image && assetData.append("image", image as any);
+            assetData.append("location_id", String(formData.location_id));
+            assetData.append("status", String(formData.status));
+            assetData.append("maintenance_template_id", formData.maintenance_template_id);
+            assetData.append("pre_use_template_id", formData.pre_use_template_id);
+            formData.manual_template_id && assetData.append("manual_template_id", formData.manual_template_id);
+
+            if (third_party_file) {
+                assetData.append("third_party_certificate", third_party_file as any);
+                if (start_date) {
+                    assetData.append("third_party_start_date", start_date.toISOString().split("T")[0]);
+                }
+
+                if (end_date) {
+                    assetData.append("third_party_expiry_date", end_date.toISOString().split("T")[0]);
+                }
+            }
+
+            console.log("\n===== FORM DATA =====");
+            console.log(JSON.stringify(assetData, null, 2));
+            console.log("location", assetData.get("location_id"));
+            console.log("========================\n");
+
+            const result = await UpdateAsset(Number(id), assetData);
+
+            if (result.has_error && result.error_code === "PERMISSION_DENIED") {
+                Alert.alert("Asset", "Permission Denied to Update Asset");
+            }
+
+            if (result.has_error) {
+                Alert.alert("Asset", result.message);
+                console.log("error: ", result.message);
+            }
+
+            if (!result.has_error) {
+                Alert.alert("Asset", "Asset Updated Successfully");
+            }
+        } catch (error) {
+            console.error("Update error:", error);
+            Alert.alert("Error", "Something went wrong");
+        } finally {
+            loadData();
+            setUpdateLoading(false);
+        }
     }
 
     async function fetchAsset() {
@@ -117,7 +180,7 @@ const AssetEdit = ({ id }: { id: string }) => {
 
                 setFormData({
                     name: a.name ?? "",
-                    location_id: a.location ?? "",
+                    location_id: a.location.id ?? "",
                     batch_code: a.batch_code ?? "",
                     image: a.image ?? "",
                     manual_template_id: String(a.manual_template?.id) ?? "",
@@ -307,27 +370,32 @@ const AssetEdit = ({ id }: { id: string }) => {
         }
     }
 
-    useEffect(() => {
-        async function loadData() {
-            try {
-                setLoading(true);
+    async function loadData() {
+        try {
+            setLoading(true);
 
-                await Promise.all([
-                    fetchAsset(),
-                    getLocations(),
-                    fetchManualTemplates(),
-                    fetchMaintenanceTemplates(),
-                    fetchPreUseTemplates(),
-                ]);
-            } catch (err) {
-                console.error("Error loading data:", err);
-            } finally {
-                setLoading(false);
-            }
+            await Promise.all([
+                fetchAsset(),
+                getLocations(),
+                fetchManualTemplates(),
+                fetchMaintenanceTemplates(),
+                fetchPreUseTemplates(),
+            ]);
+        } catch (err) {
+            console.error("Error loading data:", err);
+        } finally {
+            setLoading(false);
         }
-
+    }
+    useEffect(() => {
         loadData();
     }, []);
+
+    // useEffect(() => {
+    //     console.log("location type: ", typeof asset?.location?.id);
+    //     console.log("Maintenance type", typeof asset?.maintenance_template?.id);
+    //     console.log("preuse type", typeof asset?.pre_use_template?.id);
+    // }, [asset]);
 
     const statusOptions = [
         { label: "Active", value: "1" },
@@ -504,7 +572,7 @@ const AssetEdit = ({ id }: { id: string }) => {
                     labelField='name'
                     valueField='id'
                     placeholder='select location'
-                    value={formData?.location_id as number}
+                    value={formData.location_id as number}
                     onChange={(val) => handleChange("location_id", val)}
                 />
                 <Text className='text-right text-blue-700 mt-2 text-sm' onPress={() => setIsLocationModalOpen(true)}>
@@ -679,12 +747,7 @@ const AssetEdit = ({ id }: { id: string }) => {
             <View className='flex-col gap-2'>
                 <TouchableOpacity
                     className='bg-[#263f94] rounded-xl px-3 py-2 active:opacity-80 w-full'
-                    onPress={() =>
-                        downloadFile(
-                            ("https://api.tagxl.com/" +
-                                asset?.third_party_certificate[0].third_party_certificate) as string
-                        )
-                    }>
+                    onPress={handleSave}>
                     <Text className='text-white text-center font-semibold text-[16px]'>Save Changes</Text>
                 </TouchableOpacity>
             </View>
@@ -704,6 +767,13 @@ const AssetEdit = ({ id }: { id: string }) => {
                     </Text>
                 </TouchableOpacity>
             </View>
+
+            {update_loading && (
+                <View className='absolute inset-0 bg-black/40 flex items-center justify-center z-50'>
+                    <ActivityIndicator size='large' color='#fff' />
+                    <Text className='text-white mt-3 font-semibold'>Updating asset...</Text>
+                </View>
+            )}
         </View>
     );
 };

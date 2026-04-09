@@ -70,6 +70,19 @@ export const CreateAsset = async function (formData: FormData) {
     return result;
 };
 
+export const UpdateAsset = async function (id: number, formData: FormData) {
+    const result = await clientFetch("/company/asset/update/"+id, {
+        method: "PUT",
+        headers: {
+            ...(await getAuthHeaders()),
+            // "Content-Type": "application/json",
+        },
+        body: formData,
+    });
+
+    return result;
+};
+
 export const CreateTag = async function (uid: string, tag_type: string) {
     const result = await clientFetch("/company/tag/create", {
         method: "POST",
