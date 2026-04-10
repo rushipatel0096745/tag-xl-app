@@ -29,7 +29,7 @@ const SignIn = () => {
     };
 
     const Login = async function () {
-        setLoading(true);
+        setLoading(true);   
         if (!validate()) return;
         // console.log("logges in");
         const result = await clientFetch("/company/company-login", {

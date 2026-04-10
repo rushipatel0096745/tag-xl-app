@@ -1,85 +1,153 @@
 // app/(app)/(tabs)/_layout.tsx
 
-import NfcBottomSheet from "@/components/NfcBottomSheet";
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import AppBottomSheet from "@/components/AppBottomSheet";
+import BottomSheet from "@gorhom/bottom-sheet";
 import { Tabs } from "expo-router";
-import { Home, User } from "lucide-react-native";
-import { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Home, Search, User } from "lucide-react-native";
+import { useRef } from "react";
 
 export default function TabsLayout() {
-    const [openSheet, setOpenSheet] = useState(false);
+    // const [openSheet, setOpenSheet] = useState(false);
+    const sheetRef = useRef<BottomSheet>(null);
+    const isOpenRef = useRef(false);
+
+    const toggleSheet = () => {
+        if (isOpenRef.current) {
+            sheetRef.current?.close();
+        } else {
+            sheetRef.current?.expand();
+        }
+        isOpenRef.current = !isOpenRef.current;
+    };
 
     return (
-        <BottomSheetModalProvider>
-            <View className='flex-1'>
-                <Tabs screenOptions={{ headerShown: true }}>
-                    <Tabs.Screen
-                        name='home/index'
-                        options={{
-                            title: "Home",
-                            tabBarIcon: ({ color }) => <Home color={color} />,
-                            headerTitle: "Dashboard",
-                            headerTitleAlign: "center",
-                        }}
-                    />
+        <>
+            <Tabs
+                screenOptions={{
+                    headerShown: true,
+                    tabBarStyle: {
+                        borderTopLeftRadius: 20,
+                        borderTopRightRadius: 20,
+                        overflow: "hidden",
+                        position: "absolute",
+                        paddingTop: 10,
+                    },
+                }}>
+                <Tabs.Screen
+                    name='home/index'
+                    options={{
+                        title: "Home",
+                        tabBarIcon: ({ color }) => <Home color={color} />,
+                        headerTitle: "Dashboard",
+                        headerTitleAlign: "center",
+                    }}
+                />
 
-                    <Tabs.Screen
-                        name='nfc-dummy'
-                        options={{
-                            title: "",
-                            tabBarButton: ({ onPress, accessibilityState }) => (
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        console.log("OPEN SHEET");
-                                        setOpenSheet(true);
-                                    }}
-                                    activeOpacity={0.8}
-                                    style={{
-                                        top: -20,
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                    }}>
-                                    <View
-                                        style={{
-                                            backgroundColor: "#1e3a8a",
-                                            padding: 20,
-                                            borderRadius: 40,
-                                        }}>
-                                        <Text style={{ color: "white" }}>📡</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            ),
-                        }}
-                    />
+                <Tabs.Screen
+                    name='search-asset/index'
+                    options={{
+                        title: "Search",
+                        tabBarIcon: ({ color }) => <Search color={color} />,
+                        headerTitle: "Search Asset",
+                        headerTitleAlign: "center",
+                    }}
+                />
 
-                    <Tabs.Screen
-                        name='profile'
-                        options={{
-                            title: "Profile",
-                            tabBarIcon: ({ color }) => <User color={color} />,
-                        }}
-                    />
+                <Tabs.Screen
+                    name='search-asset/asset-detail'
+                    options={{
+                        href: null,
+                        headerTitle: "Asset Details",
+                        headerTitleAlign: "center",
+                    }}
+                />
 
-                    <Tabs.Screen
-                        name='home/asset'
-                        options={{
-                            href: null,
-                            headerShown: false,
-                        }}
-                    />
+                {/* <Tabs.Screen
+                name='modal-trigger'
+                options={{
+                    title: "Modal",
+                    tabBarButton: (props) => (
+                        <TouchableOpacity {...(props as any)} onPress={() => router.push("/modal")}>
+                            {props.children}
+                        </TouchableOpacity>
+                    ),
+                }}
+            /> */}
 
-                    <Tabs.Screen
-                        name='home/alerts'
-                        options={{
-                            href: null,
-                            headerShown: false,
-                        }}
-                    />
-                </Tabs>
+                {/* <Tabs.Screen
+                    name='my-modal'
+                    options={{
+                        tabBarButton: () => (
+                            <TouchableOpacity onPress={() => router.push("/(app)/(tabs)/my-modal")}>
+                                <Text>Open Modal</Text>
+                            </TouchableOpacity>
+                        ),
+                    }}
+                /> */}
+                {/* <Tabs.Screen
+                    name='modal-trigger'
+                    options={{
+                        title: "Modal",
+                        tabBarButton: () => (
+                            <TouchableOpacity
+                                onPress={toggleSheet}
+                                style={{
+                                    top: -30,
+                                    width: 60,
+                                    height: 60,
+                                    borderRadius: 30,
+                                    backgroundColor: "#2563eb",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    elevation: 5,
+                                }}>
+                                <Plus size={28} color='white' />
+                            </TouchableOpacity>
+                        ),
+                    }}
+                /> */}
 
-                <NfcBottomSheet open={openSheet} setOpen={setOpenSheet} />
-            </View>
-        </BottomSheetModalProvider>
+                <Tabs.Screen
+                    name='profile'
+                    options={{
+                        title: "Profile",
+                        tabBarIcon: ({ color }) => <User color={color} />,
+                    }}
+                />
+
+                <Tabs.Screen
+                    name='my-modal'
+                    options={{
+                        href: null,
+                        headerShown: false,
+                    }}
+                />
+
+                <Tabs.Screen
+                    name='modal-trigger'
+                    options={{
+                        href: null,
+                        headerShown: false,
+                    }}
+                />
+
+                <Tabs.Screen
+                    name='home/asset'
+                    options={{
+                        href: null,
+                        headerShown: false,
+                    }}
+                />
+
+                <Tabs.Screen
+                    name='home/alerts'
+                    options={{
+                        href: null,
+                        headerShown: false,
+                    }}
+                />
+            </Tabs>
+            <AppBottomSheet ref={sheetRef} />
+        </>
     );
 }

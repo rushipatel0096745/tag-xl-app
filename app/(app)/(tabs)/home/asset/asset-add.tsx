@@ -1,12 +1,13 @@
 import AddAsset from "@/components/assets/add-asset/AddAsset";
+import AppScreen from "@/components/common/AppScreen";
 import React from "react";
 import { View } from "react-native";
 
 const CreateAsset = () => {
     return (
-        <View className='flex-1'>
+        <AppScreen>
             <AddAsset />
-        </View>
+        </AppScreen>
     );
 };
 

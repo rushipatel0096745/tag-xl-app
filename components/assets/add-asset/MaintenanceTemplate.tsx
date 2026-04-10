@@ -1,7 +1,7 @@
 import Dropdown from "@/components/common/Dropdown";
 import NativeDropdown from "@/components/common/NativeDropdown";
-import { GetMaintenanceTemplateAssetList, GetPreUseTemplateAssetList } from "@/services/templates";
-import { MaintenanceTemplteListItem, PreUseTemplteListItem } from "@/types/Templates";
+import { GetMaintenanceTemplateAssetList } from "@/services/templates";
+import { MaintenanceTemplteListItem } from "@/types/Templates";
 import { Checkbox } from "expo-checkbox";
 import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
@@ -11,6 +11,7 @@ type Props = {
     formData: any;
     updateForm: (name: string, value: any) => void;
     error: Record<string, string>;
+    onDragStateChange?: (dragging: boolean) => void;
 };
 
 type Question = {
@@ -26,9 +27,11 @@ type QuestionCreate = {
     multiselect_value?: Record<string, string> | null;
 };
 
-const MaintenanceTemplate = ({ formData, updateForm, error }: Props) => {
+const MaintenanceTemplate = ({ formData, updateForm, error, onDragStateChange }: Props) => {
     const [preUseTempList, setPreUseTempList] = useState<MaintenanceTemplteListItem[]>([]);
     const [allQuesions, setAllQuestions] = useState<Question[]>([]);
+
+    const [isDragging, setIsDragging] = useState(false);
 
     const typeOptions = [
         { label: "Yes/No", value: "boolean" },
@@ -243,20 +246,29 @@ const MaintenanceTemplate = ({ formData, updateForm, error }: Props) => {
                 </View>
             )}
 
-            <View className='border p-2 mt-1 border-gray-400 rounded-xl'>
-                {newQuestions.length !== 0 && (
+            {newQuestions.length !== 0 && (
+                <View className='border p-2 mt-1 border-gray-400 rounded-xl'>
                     <>
                         <Text className='text-lg font-semibold p-2'>New Added Questions</Text>
 
                         <DraggableFlatList
                             data={newQuestions}
-                            keyExtractor={(item, index) => index.toString()}
+                            keyExtractor={(item) => `${item.question}-${item.type}`}
                             renderItem={renderItem}
-                            onDragEnd={({ data }) => setNewQuestions(data)}
+                            onDragBegin={() => {
+                                setIsDragging(true);
+                                onDragStateChange?.(true);
+                            }}
+                            onDragEnd={({ data }) => {
+                                setNewQuestions(data);
+                                setIsDragging(false);
+                                onDragStateChange?.(false);
+                            }}
+                            scrollEnabled={false}
                         />
                     </>
-                )}
-            </View>
+                </View>
+            )}
 
             <View className='border p-4 mt-1 border-gray-400 rounded-xl bg-white'>
                 <Text className='text-lg font-semibold'>Add Question</Text>

@@ -4,7 +4,7 @@ import {
     GetManualTemplateAssetList,
     GetPreUseTemplateAssetList,
 } from "@/services/templates";
-import { AssetDetail } from "@/types/Aseet";
+import { AssetDetail, Question } from "@/types/Aseet";
 import { MaintenanceTemplteListItem, ManualTemplateListItem, PreUseTemplteListItem } from "@/types/Templates";
 import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
@@ -64,6 +64,9 @@ const AssetEdit = ({ id }: Props) => {
     const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
     const [unassignModalError, setUnassignModalError] = useState("");
     const [assignModalError, setAssignModalError] = useState("");
+
+    const [preUseQuestions, setPreUseQuestions] = useState<Question[] | null>(null);
+    const [maintenanceQuestions, setMaintenanceQuestions] = useState<Question[] | null>(null);
 
     const openUnassignModal = () => setIsUnassignModalOpen(true);
     const openAssignModal = () => setIsAssignModalOpen(true);
@@ -191,6 +194,9 @@ const AssetEdit = ({ id }: Props) => {
                     pre_use_template_id: String(a.pre_use_template?.id) ?? "",
                     maintenance_template_id: String(a.maintenance_template?.id) ?? "",
                 });
+
+                setMaintenanceQuestions(a.maintenance_template.questions);
+                setPreUseQuestions(a.pre_use_template.questions);
             }
         } catch (err) {
             console.error("Error fetching assets:", err);
@@ -205,6 +211,19 @@ const AssetEdit = ({ id }: Props) => {
     async function fetchMaintenanceTemplates() {
         const result = await GetMaintenanceTemplateAssetList();
         setMaintenanceTemplateList(result?.maintenance_templates);
+        // setMaintenanceQuestions(result?.maintenance_template)
+    }
+
+    function displayQuestions(id: number, type: "maintenance" | "preuse") {
+        if (type === "maintenance") {
+            const template = maintenanceTemplateList.find((temp) => temp.id === id);
+            if (template) setMaintenanceQuestions(template.questions);
+        }
+
+        if (type === "preuse") {
+            const template = preUseTemplateList.find((temp) => temp.id === id);
+            if (template) setPreUseQuestions(template.questions);
+        }
     }
 
     async function fetchPreUseTemplates() {
@@ -614,28 +633,62 @@ const AssetEdit = ({ id }: Props) => {
                 />
             </View>
 
+            {/* preuse template */}
             <View className='flex-col gap-2'>
-                <Text className='text-[16px]'>Pre-use Check Template</Text>
-                <NativeDropdown
-                    data={preUseTemplateList}
-                    labelField='title'
-                    valueField='id'
-                    placeholder='Select Pre Use Template'
-                    value={Number(formData.pre_use_template_id)}
-                    onChange={(item) => handleChange("pre_use_template_id", item)}
-                />
+                <View className='flex-col gap-2'>
+                    <Text className='text-[16px]'>Pre-use Check Template</Text>
+                    <NativeDropdown
+                        data={preUseTemplateList}
+                        labelField='title'
+                        valueField='id'
+                        placeholder='Select Pre Use Template'
+                        value={Number(formData.pre_use_template_id)}
+                        onChange={(item) => {
+                            handleChange("pre_use_template_id", item);
+                            displayQuestions(Number(item), "preuse");
+                        }}
+                    />
+                    {preUseQuestions && (
+                        <View className='flex flex-col justify-between gap-2 bg-white p-2 border-0 rounded-lg'>
+                            <Text className='text-[15px] text-gray-500'>Template Questions</Text>
+                            {preUseQuestions?.map((q: Question) => (
+                                <View key={q.id} className='flex flex-row items-center gap-2'>
+                                    <View className='w-1.5 h-1.5 rounded-full bg-gray-800' />
+                                    <Text>{q.question}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    )}
+                </View>
             </View>
 
+            {/* maintenance check template */}
             <View className='flex-col gap-2'>
-                <Text className='text-[16px]'>Maintenance Check Template</Text>
-                <NativeDropdown
-                    data={maintenanceTemplateList}
-                    labelField='title'
-                    valueField='id'
-                    placeholder='Select Maintenance Template'
-                    value={Number(formData.maintenance_template_id)}
-                    onChange={(item) => handleChange("maintenance_template_id", item)}
-                />
+                <View className='flex-col gap-2'>
+                    <Text className='text-[16px]'>Maintenance Check Template</Text>
+                    <NativeDropdown
+                        data={maintenanceTemplateList}
+                        labelField='title'
+                        valueField='id'
+                        placeholder='Select Maintenance Template'
+                        value={Number(formData.maintenance_template_id)}
+                        onChange={(item) => {
+                            handleChange("maintenance_template_id", item);
+                            displayQuestions(Number(item), "maintenance");
+                        }}
+                    />
+                    {maintenanceQuestions && (
+                        <View className='flex flex-col justify-between gap-2 bg-white p-2 border-0 rounded-lg'>
+                            <Text className='text-[15px] text-gray-500'>Template Questions</Text>
+                            {maintenanceQuestions?.map((q: Question) => (
+                                <View key={q.id} className='flex flex-row items-center gap-2'>
+                                    <View className='w-1.5 h-1.5 rounded-full bg-gray-800' />
+                                    <Text>{q.question}</Text>
+                                </View>
+                            ))}
+                        </View>
+                    )}
+                </View>
             </View>
 
             <View className='flex-col gap-2'>

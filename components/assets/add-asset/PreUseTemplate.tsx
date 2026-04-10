@@ -11,6 +11,7 @@ type Props = {
     formData: any;
     updateForm: (name: string, value: any) => void;
     error: Record<string, string>;
+    onDragStateChange?: (dragging: boolean) => void;
 };
 
 type Question = {
@@ -26,7 +27,9 @@ type QuestionCreate = {
     multiselect_value?: Record<string, string> | null;
 };
 
-const PreUseTemplate = ({ formData, updateForm, error }: Props) => {
+const PreUseTemplate = ({ formData, updateForm, error, onDragStateChange }: Props) => {
+    const [isDragging, setIsDragging] = useState(false);
+
     const [preUseTempList, setPreUseTempList] = useState<PreUseTemplteListItem[]>([]);
     const [allQuesions, setAllQuestions] = useState<Question[]>([]);
 
@@ -99,7 +102,7 @@ const PreUseTemplate = ({ formData, updateForm, error }: Props) => {
 
         // reset
         setQuestionText("");
-        setQuesitonType("");
+        // setQuesitonType("");
         setOptions([""]);
     }
 
@@ -266,21 +269,29 @@ const PreUseTemplate = ({ formData, updateForm, error }: Props) => {
                 )}
             </View> */}
 
-            <View className='border p-2 mt-1 border-gray-400 rounded-xl'>
-                {newQuestions.length !== 0 && (
+            {newQuestions.length !== 0 && (
+                <View className='border p-2 mt-1 border-gray-400 rounded-xl'>
                     <>
                         <Text className='text-lg font-semibold p-2'>New Added Questions</Text>
 
                         <DraggableFlatList
                             data={newQuestions}
-                            keyExtractor={(item, index) => index.toString()}
+                            keyExtractor={(item) => `${item.question}-${item.type}`}
                             renderItem={renderItem}
-                            onDragEnd={({ data }) => setNewQuestions(data)}
-                            scrollEnabled={false} 
+                            onDragBegin={() => {
+                                setIsDragging(true);
+                                onDragStateChange?.(true);
+                            }}
+                            onDragEnd={({ data }) => {
+                                setNewQuestions(data);
+                                setIsDragging(false);
+                                onDragStateChange?.(false);
+                            }}
+                            scrollEnabled={false}
                         />
                     </>
-                )}
-            </View>
+                </View>
+            )}
 
             <View className='border p-4 mt-1 border-gray-400 rounded-xl bg-white'>
                 <Text className='text-lg font-semibold'>Add Question</Text>

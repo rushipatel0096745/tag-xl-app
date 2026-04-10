@@ -30,6 +30,24 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
         formData.third_party_certificate || null
     );
 
+    useEffect(() => {
+        if (formData.oem_certificate && !OEMfile) {
+            setOEMFile({
+                uri: formData.oem_certificate.uri,
+                name: formData.oem_certificate.name,
+                mimeType: formData.oem_certificate.type,
+            });
+        }
+
+        if (formData.third_party_certificate && !third_party_file) {
+            setThirdPartyFile({
+                uri: formData.third_party_certificate.uri,
+                name: formData.third_party_certificate.name,
+                mimeType: formData.third_party_certificate.type,
+            });
+        }
+    }, []);
+
     const parseDate = (date: any) => {
         if (!date) return undefined;
         const d = new Date(date);
@@ -197,12 +215,15 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
     function handleSave() {
         if (!validate()) return;
 
-        const oem_certificate = {
-            name: OEMfile?.name,
-            uri: OEMfile?.uri,
-            type: OEMfile?.mimeType,
-        };
-        updateForm("oem_certificate", oem_certificate);
+        if (OEMfile) {
+            const oem_certificate = {
+                name: OEMfile.name,
+                uri: OEMfile.uri,
+                type: OEMfile.mimeType || "image/jpeg",
+            };
+
+            updateForm("oem_certificate", oem_certificate);
+        }
 
         if (third_party_file) {
             const third_party_certificate = {
@@ -218,7 +239,7 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
             updateForm("third_party_start_date", start);
             updateForm("third_party_expiry_date", expiry);
         }
-        console.log("form data: ", formData);
+        console.log("form data: ", JSON.stringify(formData, null, 2));
         next();
     }
 
@@ -255,6 +276,9 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
             handleCustom(customDate);
         }
     }, [startDate]);
+
+    const OEMCertificateURI = OEMfile?.uri || formData.oem_certificate?.uri;
+    const ThirdPartyCertificateURI = third_party_file?.uri || formData.third_party_certificate?.uri;
 
     return (
         <ScrollView>
@@ -323,9 +347,9 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
 
                 <View className='gap-2'>
                     <Text className='text-[16px] font-semibold'>OEM Certificate</Text>
-                    {OEMfile && (
+                    {OEMCertificateURI && (
                         <View className='relative self-start'>
-                            <Image source={{ uri: OEMfile.uri }} className='w-20 h-20 rounded-xl bg-gray-100' />
+                            <Image source={{ uri: OEMCertificateURI }} className='w-20 h-20 rounded-xl bg-gray-100' />
                             <TouchableOpacity
                                 onPress={() => removeFile("oem")}
                                 className='absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full items-center justify-center'>
@@ -351,12 +375,14 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
 
                 <View className='gap-2'>
                     <Text className='text-[16px] font-semibold'>Third Party Certificate</Text>
-                    {third_party_file && (
+                    {ThirdPartyCertificateURI && (
                         <View className='relative self-start'>
                             <Image
-                                source={{ uri: third_party_file?.uri }}
+                                source={{
+                                    uri: ThirdPartyCertificateURI,
+                                }}
                                 className='w-20 h-20 rounded-xl bg-gray-100'
-                                // contentFit='cover'
+                                resizeMode='cover'
                             />
 
                             <TouchableOpacity
@@ -382,7 +408,7 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
                         <Text className='text-red-500 text-sm mt-1'>{errors.third_party_certificate}</Text>
                     )}
 
-                    {third_party_file && (
+                    {(third_party_file || formData.third_party_certificate) && (
                         <View className='gap-3 mt-2'>
                             <DateInput
                                 label='Start Date'
@@ -445,15 +471,15 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
 
                 {/*  Navigation  */}
                 <View className='flex-row justify-between gap-2 mt-2'>
-                    <TouchableOpacity className='py-2.5 px-3.5 border border-[#263f94] rounded-xl justify-center items-center h-9.5'>
-                        <Pressable onPress={prev}>
-                            <Text className='text-[#263f94] text-[14px] font-medium'>Back</Text>
-                        </Pressable>
+                    <TouchableOpacity
+                        className='py-2.5 px-3.5 border border-[#263f94] rounded-xl justify-center items-center h-9.5'
+                        onPress={prev}>
+                        <Text className='text-[#263f94] text-[14px] font-medium'>Back</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity className='bg-[#263f94] rounded-xl py-3 px-4 items-center self-end'>
-                        <Pressable onPress={handleSave}>
-                            <Text className='text-white text-[14px] font-medium'>Continue</Text>
-                        </Pressable>
+                    <TouchableOpacity
+                        className='bg-[#263f94] rounded-xl py-3 px-4 items-center self-end'
+                        onPress={handleSave}>
+                        <Text className='text-white text-[14px] font-medium'>Continue</Text>
                     </TouchableOpacity>
                 </View>
             </View>

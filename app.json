@@ -62,7 +62,8 @@
         }
       ],
       "expo-secure-store",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "react-native-nfc-manager"
     ],
     "experiments": {
       "typedRoutes": true,

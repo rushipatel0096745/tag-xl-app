@@ -129,10 +129,10 @@ const Step1 = ({ next, updateForm, validate, errors, formData }: Props) => {
 
             {/* Button */}
             <View>
-                <TouchableOpacity className='bg-[#263f94] rounded-xl py-3 px-4 items-center self-end'>
-                    <Pressable onPress={handleSave}>
-                        <Text className='text-white text-[14px] font-medium'>Continue</Text>
-                    </Pressable>
+                <TouchableOpacity
+                    className='bg-[#263f94] rounded-xl py-3 px-4 items-center self-end'
+                    onPress={handleSave}>
+                    <Text className='text-white text-[14px] font-medium'>Continue</Text>
                 </TouchableOpacity>
             </View>
         </View>

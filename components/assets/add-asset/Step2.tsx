@@ -172,6 +172,8 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
         next();
     }
 
+    const imageUri = uploadedFile?.uri || formData?.image?.uri;
+
     return (
         <View className='flex flex-col gap-6 p-2'>
             {/* Upload modal */}
@@ -316,12 +318,12 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
                 <Text className='text-[16px] font-semibold'>Add Images</Text>
 
                 {/* Uploaded previews */}
-                {uploadedFile && (
+                {(uploadedFile || formData.image) && (
                     <View className='flex-row flex-wrap gap-2 mb-2'>
                         <View className='relative'>
-                            {uploadedFile?.type === "image" ? (
+                            {imageUri ? (
                                 <Image
-                                    source={{ uri: uploadedFile?.uri }}
+                                    source={{ uri: uploadedFile ? uploadedFile?.uri : formData.image.uri }}
                                     className='w-20 h-20 rounded-xl bg-gray-100'
                                     resizeMode='cover'
                                 />
@@ -358,15 +360,19 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
 
             {/* ── Navigation ── */}
             <View className='flex-row justify-between gap-2 mt-2'>
-                <TouchableOpacity className='py-2.5 px-3.5 border border-[#263f94] rounded-xl justify-center items-center h-9.5'>
-                    <Pressable onPress={prev}>
+                <TouchableOpacity
+                    className='py-2.5 px-3.5 border border-[#263f94] rounded-xl justify-center items-center h-9.5'
+                    onPress={prev}>
+                    
                         <Text className='text-[#263f94] text-[14px] font-medium'>Back</Text>
-                    </Pressable>
+                   
                 </TouchableOpacity>
-                <TouchableOpacity className='bg-[#263f94] rounded-xl py-3 px-4 items-center self-end'>
-                    <Pressable onPress={handleSave}>
+                <TouchableOpacity
+                    className='bg-[#263f94] rounded-xl py-3 px-4 items-center self-end'
+                    onPress={handleSave}>
+                   
                         <Text className='text-white text-[14px] font-medium'>Continue</Text>
-                    </Pressable>
+                   
                 </TouchableOpacity>
             </View>
         </View>

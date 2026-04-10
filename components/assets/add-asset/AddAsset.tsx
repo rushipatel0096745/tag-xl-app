@@ -1,14 +1,14 @@
 import { CreateAsset } from "@/services/asset";
-import { router } from "expo-router";
-import React, { useState } from "react";
-import { View } from "react-native";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useState } from "react";
+import { Alert, View } from "react-native";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import Step4 from "./Step4";
 
 const AddAsset = () => {
-    const [formData, setFormData] = useState({
+    const INITIAL_STATE = {
         tag_type: "Manual",
         uid: "",
         tag_id: "",
@@ -29,8 +29,17 @@ const AddAsset = () => {
         maintenance_template_id: "",
         asset_pre_use_questions: "",
         asset_maintenance_questions: "",
-    });
+    };
+
+    const [formData, setFormData] = useState(INITIAL_STATE);
     const [currentStep, setCurrentStep] = useState(1);
+
+    useFocusEffect(
+        useCallback(() => {
+            setFormData(INITIAL_STATE);
+            setCurrentStep(1);
+        }, [])
+    );
 
     const [errors, setErrors] = useState<any>({});
 
@@ -173,7 +182,12 @@ const AddAsset = () => {
         const result = await CreateAsset(assetFormData);
         console.log("response for create asset: ", result);
         if (!result?.has_error) {
-            router.push("/(app)/(tabs)/home/asset/asset-list");
+            Alert.alert("Asset", `Asset ${assetFormData.get("name")} is created`, [
+                {
+                    text: "Ok",
+                    onPress: () => router.replace("/(app)/(tabs)/home/asset/asset-list"),
+                },
+            ]);
             return;
         }
         if (result?.has_error) {
@@ -182,7 +196,6 @@ const AddAsset = () => {
     };
 
     return (
-        // <SafeAreaView className='flex-1'>
         <View className='flex-1'>
             {currentStep === 1 && (
                 <Step1
@@ -228,7 +241,6 @@ const AddAsset = () => {
                 />
             )}
         </View>
-        // </SafeAreaView>
     );
 };
 

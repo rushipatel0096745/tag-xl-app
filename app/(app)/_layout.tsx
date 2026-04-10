@@ -1,7 +1,6 @@
 // app/(app)/_layout.tsx
 
 import { useAuth } from "@/context/AuthContext";
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Redirect, Stack } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -21,11 +20,20 @@ export default function ProtectedLayout() {
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
-            <BottomSheetModalProvider>
-                <Stack>
-                    <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-                </Stack>
-            </BottomSheetModalProvider>
+            <Stack>
+                <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
+                <Stack.Screen name='maintenance-check' options={{ headerShown: true }} />
+                <Stack.Screen name='pre-use-check' options={{ headerShown: true }} />
+                {/* <Stack.Screen
+                    //name='modal'
+                    name="my-modal"
+                    options={{
+                        presentation: "transparentModal",
+                        animation: "slide_from_bottom",
+                        headerShown: false,
+                    }}
+                /> */}
+            </Stack>
         </GestureHandlerRootView>
     );
 }
