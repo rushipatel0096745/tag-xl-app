@@ -61,7 +61,7 @@ const AssetList = () => {
     useEffect(() => {
         navigation.setOptions({
             headerLeft: () => (
-                <TouchableOpacity onPress={() => router.replace("/(app)/(tabs)/home")}>
+                <TouchableOpacity onPress={() => router.back()}>
                     <ChevronLeft size={24} color='#000' />
                 </TouchableOpacity>
             ),

@@ -37,15 +37,16 @@ const AddAsset = () => {
     const [formData, setFormData] = useState(INITIAL_STATE);
     const [currentStep, setCurrentStep] = useState(1);
 
-    useEffect(() => {
-        navigation.setOptions({
-            headerLeft: () => (
-                <TouchableOpacity onPress={() => router.replace("/(app)/(tabs)/home")}>
-                    <ChevronLeft size={24} color='#000' />
-                </TouchableOpacity>
-            ),
-        });
-    }, [navigation]);
+    // useEffect(() => {
+    //     navigation.setOptions({
+    //         headerLeft: () => (
+    //             <TouchableOpacity onPress={() => router.replace("/(app)/(tabs)/home")}>
+    //                 <ChevronLeft size={24} color='#000' />
+    //             </TouchableOpacity>
+    console.table("🚀 ~ AddAsset ~ TouchableOpacity:", TouchableOpacity)
+    //         ),
+    //     });
+    // }, [navigation]);
 
     useFocusEffect(
         useCallback(() => {
@@ -191,11 +192,13 @@ const AddAsset = () => {
             assetFormData.append("asset_pre_use_questions", formData.asset_pre_use_questions);
         formData.asset_maintenance_questions &&
             assetFormData.append("asset_maintenance_questions", formData.asset_maintenance_questions);
-        console.log([...assetFormData.entries()]);
+        // Note: React Native's FormData doesn't support .entries() or .get()
+        // Use the original data for logging/debugging
+        console.log("Saving Asset Data:", formData);
         const result = await CreateAsset(assetFormData);
         console.log("response for create asset: ", result);
         if (!result?.has_error) {
-            Alert.alert("Asset", `Asset ${assetFormData.get("name")} is created`, [
+            Alert.alert("Asset", `Asset ${formData.name} is created`, [
                 {
                     text: "Ok",
                     onPress: () => router.replace("/(app)/(tabs)/home/asset/asset-list"),

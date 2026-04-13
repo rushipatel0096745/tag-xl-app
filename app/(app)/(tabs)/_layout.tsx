@@ -34,12 +34,13 @@ export default function TabsLayout() {
                     },
                 }}>
                 <Tabs.Screen
-                    name='home/index'
+                    name='home'
                     options={{
                         title: "Home",
                         tabBarIcon: ({ color }) => <Home color={color} />,
                         headerTitle: "Dashboard",
                         headerTitleAlign: "center",
+                        headerShown: false,
                     }}
                 />
 
@@ -126,22 +127,6 @@ export default function TabsLayout() {
 
                 <Tabs.Screen
                     name='modal-trigger'
-                    options={{
-                        href: null,
-                        headerShown: false,
-                    }}
-                />
-
-                <Tabs.Screen
-                    name='home/asset'
-                    options={{
-                        href: null,
-                        headerShown: false,
-                    }}
-                />
-
-                <Tabs.Screen
-                    name='home/alerts'
                     options={{
                         href: null,
                         headerShown: false,

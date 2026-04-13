@@ -138,9 +138,8 @@ const AssetEdit = ({ id }: Props) => {
                 }
             }
 
-            console.log("\n===== FORM DATA =====");
-            console.log(JSON.stringify(assetData, null, 2));
-            console.log("location", assetData.get("location_id"));
+            console.log("\n===== FORM DATA TO BE SENT =====");
+            console.log(formData);
             console.log("========================\n");
 
             const result = await UpdateAsset(Number(id), assetData);

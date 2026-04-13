@@ -131,14 +131,14 @@ const Dashboard = () => {
                 <TouchableOpacity
                     className='bg-[#263f94] rounded-xl p-2 mt-6 active:opacity-80'
                     onPress={() => {
-                        router.navigate("/home/asset/asset-add");
+                        router.push("/(app)/(tabs)/home/asset/asset-add");
                     }}>
                     <Text className='text-white text-center font-semibold text-xl'>Add Asset</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     className='bg-[#263f94] rounded-xl p-2 mt-6 active:opacity-80'
                     onPress={() => {
-                        router.navigate("/home/asset/asset-list");
+                        router.push("/(app)/(tabs)/home/asset/asset-list");
                     }}>
                     <Text className='text-white text-center font-semibold text-xl'>Asset List</Text>
                 </TouchableOpacity>

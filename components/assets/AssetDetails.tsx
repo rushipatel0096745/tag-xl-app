@@ -52,8 +52,6 @@ const AssetDetails = ({ id }: { id: string }) => {
         }
     }
 
-
-
     // async function downloadFile(url: string, folderName: string = "downloads"): Promise<string> {
     //     try {
     //         const destination = new Directory(Paths.document, folderName);
