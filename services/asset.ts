@@ -27,7 +27,6 @@ export const GetDashboardData = async function () {
             "Content-Type": "application/json",
         },
     });
-
     return result;
 };
 
@@ -82,7 +81,7 @@ export const CreateAsset = async function (formData: FormData) {
 };
 
 export const UpdateAsset = async function (id: number, formData: FormData) {
-    const result = await clientFetch("/company/asset/update/"+id, {
+    const result = await clientFetch("/company/asset/update/" + id, {
         method: "PUT",
         headers: {
             ...(await getAuthHeaders()),
@@ -165,6 +164,30 @@ export const CreateLocation = async function (name: string) {
         body: JSON.stringify({
             name: name,
         }),
+    });
+
+    return result;
+};
+
+export const PreUseAnswers = async function (formData: FormData) {
+    const result = await clientFetch("/company/asset/save-pre-use-answers", {
+        method: "POST",
+        headers: {
+            ...(await getAuthHeaders()),
+        },
+        body: formData,
+    });
+
+    return result;
+};
+
+export const MaintenanceAnswers = async function (formData: FormData) {
+    const result = await clientFetch("/company/asset/save-maintenance-answers", {
+        method: "POST",
+        headers: {
+            ...(await getAuthHeaders()),
+        },
+        body: formData,
     });
 
     return result;

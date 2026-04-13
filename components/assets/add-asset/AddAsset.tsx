@@ -1,13 +1,16 @@
 import { CreateAsset } from "@/services/asset";
-import { router, useFocusEffect } from "expo-router";
-import React, { useCallback, useState } from "react";
-import { Alert, View } from "react-native";
+import { router, useFocusEffect, useNavigation } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import { Alert, TouchableOpacity, View } from "react-native";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import Step4 from "./Step4";
+import { ChevronLeft } from "lucide-react-native";
 
 const AddAsset = () => {
+    const navigation = useNavigation();
+
     const INITIAL_STATE = {
         tag_type: "Manual",
         uid: "",
@@ -33,6 +36,16 @@ const AddAsset = () => {
 
     const [formData, setFormData] = useState(INITIAL_STATE);
     const [currentStep, setCurrentStep] = useState(1);
+
+    useEffect(() => {
+        navigation.setOptions({
+            headerLeft: () => (
+                <TouchableOpacity onPress={() => router.replace("/(app)/(tabs)/home")}>
+                    <ChevronLeft size={24} color='#000' />
+                </TouchableOpacity>
+            ),
+        });
+    }, [navigation]);
 
     useFocusEffect(
         useCallback(() => {

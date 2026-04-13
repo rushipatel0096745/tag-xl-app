@@ -45,17 +45,6 @@ const Dashboard = () => {
     return (
         <View className='main mt-4 mx-3 flex flex-col justify-between gap-2'>
             <View className='flex-row flex-wrap justify-between '>
-                {/* {Object.entries(dashboardData).map(([key, value]) => (
-                    <View className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl' key={key}>
-                        <View className='flex flex-col gap-1'>
-                            <Text className='text-2xl font-bold text-[#263f94]'>{value}</Text>
-                            <Text className='text-lg'>
-                                {" "}
-                                {key.replace(/_/g, " ").replace(/\b\w/g, (c: any) => c.toUpperCase())}
-                            </Text>
-                        </View>
-                    </View>
-                ))} */}
                 <TouchableOpacity
                     className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl'
                     onPress={() => router.push("/(app)/(tabs)/home/asset/asset-list")}>
@@ -142,14 +131,14 @@ const Dashboard = () => {
                 <TouchableOpacity
                     className='bg-[#263f94] rounded-xl p-2 mt-6 active:opacity-80'
                     onPress={() => {
-                        router.push("/home/asset/asset-add");
+                        router.navigate("/home/asset/asset-add");
                     }}>
                     <Text className='text-white text-center font-semibold text-xl'>Add Asset</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     className='bg-[#263f94] rounded-xl p-2 mt-6 active:opacity-80'
                     onPress={() => {
-                        router.push("/home/asset/asset-list");
+                        router.navigate("/home/asset/asset-list");
                     }}>
                     <Text className='text-white text-center font-semibold text-xl'>Asset List</Text>
                 </TouchableOpacity>

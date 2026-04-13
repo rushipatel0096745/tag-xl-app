@@ -9,7 +9,7 @@ import QRScanner from "./QRScanner";
 type TabType = "nfc" | "scan" | "manual";
 
 const SearchAsset = () => {
-    const [tab, setTab] = useState<TabType>("nfc");
+    const [tab, setTab] = useState<TabType>("manual");
     const [UID, setUID] = useState("");
 
     async function checkTagAssigned(uid: string) {
@@ -21,6 +21,7 @@ const SearchAsset = () => {
         }
 
         if (result.has_error && result.error_code == "RECORD_NOT_FOUND") {
+            // router.push({ pathname: "/(app)/(tabs)/search-asset/asset-detail", params: { uid: uid } });
             Alert.alert("Enter valid UID");
             return;
         }

@@ -39,7 +39,7 @@ type UploadedFile = {
 export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Props) => {
     const [locations, setLocations] = useState<Location[]>([]);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
-    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);  
     const [location_name, setLocationName] = useState("");
     const [assignError, setAssignError] = useState("");
     const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);

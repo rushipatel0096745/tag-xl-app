@@ -2,7 +2,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useDebounce } from "@/context/useDebounce";
 import { GetAssetList } from "@/services/asset";
 import { AssetItem } from "@/types/Aseet";
-import { Href, router } from "expo-router";
+import { Href, router, useNavigation } from "expo-router";
+import { ChevronLeft } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -47,6 +48,8 @@ const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => (
 );
 
 const AssetList = () => {
+    const navigation = useNavigation();
+
     const [list, setList] = useState<AssetItem[]>([]);
     const [userRole, setUserRole] = useState<string[]>([]);
     const [searchText, setSearchText] = useState("");
@@ -54,6 +57,16 @@ const AssetList = () => {
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
     const debouncedSearch = useDebounce(searchText, 500);
+
+    useEffect(() => {
+        navigation.setOptions({
+            headerLeft: () => (
+                <TouchableOpacity onPress={() => router.replace("/(app)/(tabs)/home")}>
+                    <ChevronLeft size={24} color='#000' />
+                </TouchableOpacity>
+            ),
+        });
+    }, [navigation]);
 
     async function fetchAssets() {
         try {

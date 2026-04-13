@@ -1,22 +1,32 @@
 import { GetAssetWithTag } from "@/services/asset";
 import { AssetDetail } from "@/types/Aseet";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, Linking, Text, TouchableOpacity, View } from "react-native";
-import NfcManager, { NfcTech } from "react-native-nfc-manager";
 
 const AssetDetails = ({ uid }: { uid: string }) => {
     const [asset, setAsset] = useState<AssetDetail | null>(null);
 
     async function fetchAssetWithTag() {
         const result = await GetAssetWithTag(uid);
+        console.log("asset: ", JSON.stringify(result.asset, null, 2));
 
         if (result.has_error && result.error_code === "PERMISSION_DENIED") {
             Alert.alert("Permission Denied");
         }
 
+        if (result.has_error && result.message === "Invalid Session") {
+            Alert.alert("Session Over", "", [
+                {
+                    text: "OK",
+                    onPress: () => router.push("/(auth)/sign-in"),
+                },
+            ]);
+            return;
+        }
+
         if (!result.has_error) {
-            console.log(JSON.stringify(result.asset), null, 2);
             setAsset(result?.asset);
         }
     }
@@ -42,7 +52,36 @@ const AssetDetails = ({ uid }: { uid: string }) => {
 
     useEffect(() => {
         fetchAssetWithTag();
+        console.log("uid: ", uid);
+        console.log(new Date().toString());
     }, []);
+
+    function formatDateTime(dateString: string) {
+        if (!dateString) return "";
+
+        const date = new Date(dateString + "Z");
+
+        const datePart = date
+            .toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+            })
+            .replace(/ /g, "-");
+
+        let hours = date.getHours();
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        const seconds = String(date.getSeconds()).padStart(2, "0");
+
+        const period = hours >= 12 ? "PM" : "AM";
+
+        hours = hours % 12;
+        hours = hours === 0 ? 12 : hours;
+
+        const timePart = `${hours}:${minutes}:${seconds} ${period}`;
+
+        return `${datePart} ${timePart}`;
+    }
 
     return (
         <View className='flex-1 gap-4 p-4'>
@@ -55,6 +94,20 @@ const AssetDetails = ({ uid }: { uid: string }) => {
                 <Text className='text-gray-600'>RFID No: </Text>
                 <Text className='text-lg'>{asset?.tag.uid}</Text>
             </View>
+
+            {asset?.last_pre_use_check && (
+                <View className='gap-2'>
+                    <Text className='text-gray-600'>Last Pre-use Check: </Text>
+                    <Text className='text-lg'>{formatDateTime(asset.last_pre_use_check)}</Text>
+                </View>
+            )}
+
+            {asset?.last_maintenance_check && (
+                <View className='gap-2'>
+                    <Text className='text-gray-600'>Last Maintenance Check: </Text>
+                    <Text className='text-lg'>{formatDateTime(asset.last_maintenance_check)}</Text>
+                </View>
+            )}
 
             <View className='gap-2'>
                 <Text className='text-gray-600'>Documents: </Text>
@@ -100,12 +153,20 @@ const AssetDetails = ({ uid }: { uid: string }) => {
                         </TouchableOpacity>
                     </View>
                     <View className='items-center w-full'>
-                        <TouchableOpacity className='bg-[#263f94] rounded-xl py-3 px-4 items-center w-full'>
+                        <TouchableOpacity
+                            className='bg-[#263f94] rounded-xl py-3 px-4 items-center w-full'
+                            onPress={() =>
+                                router.push({ pathname: "/pre-use-check", params: { asset_id: asset?.id } })
+                            }>
                             <Text className='text-white text-xl font-medium text-center'>Pre-use Check</Text>
                         </TouchableOpacity>
                     </View>
                     <View className='items-center w-full'>
-                        <TouchableOpacity className='bg-[#263f94] rounded-xl py-3 px-4 items-center w-full'>
+                        <TouchableOpacity
+                            className='bg-[#263f94] rounded-xl py-3 px-4 items-center w-full'
+                            onPress={() =>
+                                router.push({ pathname: "/maintenance-check", params: { asset_id: asset?.id } })
+                            }>
                             <Text className='text-white text-xl font-medium text-center'>Maintenance Check</Text>
                         </TouchableOpacity>
                     </View>

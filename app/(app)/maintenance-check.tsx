@@ -1,13 +1,13 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import AppScreen from '@/components/common/AppScreen'
+import AppScreen from "@/components/common/AppScreen";
+import MaintenanceCheck from "@/components/search/MaintenanceCheck";
+import React from "react";
 
 const MaintenanceCheckView = () => {
-  return (
-    <AppScreen>
-      <Text>MaintenanceCheckView</Text>
-    </AppScreen>
-  )
-}
+    return (
+        <AppScreen>
+            <MaintenanceCheck />
+        </AppScreen>
+    );
+};
 
-export default MaintenanceCheckView
+export default MaintenanceCheckView;

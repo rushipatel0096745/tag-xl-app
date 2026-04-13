@@ -37,7 +37,7 @@ export default function QRScanner({ onScan }: { onScan: (uid: string) => void })
         }
 
         setScanned(true);
-        onScan(parsedData.uid); 
+        onScan(parsedData.uid);
     };
 
     const handleFlash = () => {
@@ -73,10 +73,7 @@ export default function QRScanner({ onScan }: { onScan: (uid: string) => void })
                 </View>
             </View>
 
-            <TouchableOpacity
-                onPress={handleFlash}
-                className='absolute top-20 right-6 bg-black/40 p-3 rounded-full'
-            >
+            <TouchableOpacity onPress={handleFlash} className='absolute top-20 right-6 bg-black/40 p-3 rounded-full'>
                 <Ionicons name={flash === "off" ? "flash-off" : "flash"} size={22} color='white' />
             </TouchableOpacity>
         </View>

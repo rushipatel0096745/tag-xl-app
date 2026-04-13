@@ -61,6 +61,7 @@ export default function TabsLayout() {
                         headerTitleAlign: "center",
                     }}
                 />
+                
 
                 {/* <Tabs.Screen
                 name='modal-trigger'
