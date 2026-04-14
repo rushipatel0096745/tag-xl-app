@@ -1,8 +1,8 @@
-import React, { forwardRef, useMemo } from "react";
 import BottomSheet, {
-  BottomSheetView,
   BottomSheetBackdrop,
+  BottomSheetView,
 } from "@gorhom/bottom-sheet";
+import React, { forwardRef, useMemo } from "react";
 import { Text } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

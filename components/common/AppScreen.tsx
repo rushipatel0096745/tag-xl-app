@@ -1,5 +1,6 @@
 // components/ui/AppScreen.tsx
 
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -11,6 +12,8 @@ type Props = {
 };
 
 export default function AppScreen({ children, scroll = false, loading = false }: Props) {
+    const tabBarHeight = useBottomTabBarHeight();
+
     // if (!scroll) {
     //     return <SafeAreaView style={{ flex: 1 }}>{children}</SafeAreaView>;
     // }
@@ -23,7 +26,13 @@ export default function AppScreen({ children, scroll = false, loading = false }:
 
     return (
         <SafeAreaView style={{ flex: 1 }} edges={["left", "right"]}>
-            {scroll ? <ScrollView contentContainerStyle={{ flexGrow: 1 }}>{children}</ScrollView> : children}
+            {scroll ? (
+                <ScrollView contentContainerStyle={{ flexGrow: 1, paddingBottom: tabBarHeight + 10 }}>
+                    {children}
+                </ScrollView>
+            ) : (
+                <View style={{ flex: 1, paddingBottom: tabBarHeight }}>{children}</View>
+            )}
 
             {/* GLOBAL OVERLAY */}
             {loading && (

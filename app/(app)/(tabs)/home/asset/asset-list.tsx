@@ -1,13 +1,13 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import AssetList from '@/components/assets/AssetList'
+import AssetList from "@/components/assets/AssetList";
+import AppScreen from "@/components/common/AppScreen";
+import React from "react";
 
 const AssetListView = () => {
-  return (
-    <View className='flex-1'>
-      <AssetList />
-    </View>
-  )
-}
+    return (
+        <AppScreen>
+            <AssetList />
+        </AppScreen>
+    );
+};
 
-export default AssetListView
+export default AssetListView;

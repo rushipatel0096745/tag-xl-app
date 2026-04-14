@@ -3,20 +3,17 @@ import { useDebounce } from "@/context/useDebounce";
 import { GetAssetList } from "@/services/asset";
 import { AssetItem } from "@/types/Aseet";
 import { Href, router, useNavigation } from "expo-router";
-import { ChevronLeft } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     ActivityIndicator,
     FlatList,
     Image,
-    StatusBar,
-    StyleSheet,
+    RefreshControl,
     Text,
     TextInput,
     TouchableOpacity,
     View,
 } from "react-native";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 type ItemProps = {
     item: AssetItem;
@@ -58,15 +55,17 @@ const AssetList = () => {
     const { user } = useAuth();
     const debouncedSearch = useDebounce(searchText, 500);
 
-    useEffect(() => {
-        navigation.setOptions({
-            headerLeft: () => (
-                <TouchableOpacity onPress={() => router.back()}>
-                    <ChevronLeft size={24} color='#000' />
-                </TouchableOpacity>
-            ),
-        });
-    }, [navigation]);
+    const [refreshing, setRefreshing] = useState(false);
+
+    // useEffect(() => {
+    //     navigation.setOptions({
+    //         headerLeft: () => (
+    //             <TouchableOpacity onPress={() => router.back()}>
+    //                 <ChevronLeft size={24} color='#000' />
+    //             </TouchableOpacity>
+    //         ),
+    //     });
+    // }, [navigation]);
 
     async function fetchAssets() {
         try {
@@ -99,6 +98,14 @@ const AssetList = () => {
         setUserRole(user?.role.permission.asset ?? []);
     }, [debouncedSearch]);
 
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+
+        fetchAssets();
+
+        setRefreshing(false);
+    }, []);
+
     const [selectedId, setSelectedId] = useState<number>();
 
     const renderItem = ({ item }: { item: AssetItem }) => {
@@ -121,54 +128,38 @@ const AssetList = () => {
     };
 
     return (
-        <SafeAreaProvider>
-            <SafeAreaView className='flex-1'>
-                {errors.permission && <Text className='text-red-500'>{errors.permission}</Text>}
-                {loading ? (
-                    <View className='flex flex-row justify-center items-center'>
-                        <ActivityIndicator size='large' />
+        <View className='flex-1'>
+            {errors.permission && <Text className='text-red-500'>{errors.permission}</Text>}
+            {loading ? (
+                <View className='flex flex-row justify-center items-center'>
+                    <ActivityIndicator size='large' />
+                </View>
+            ) : (
+                <>
+                    <View className='search-bar p-2'>
+                        <TextInput
+                            className='border border-gray-200 rounded-xl p-4 bg-gray-50 text-gray-800 focus:border-gray-400'
+                            placeholder='Type Asset Name'
+                            value={searchText}
+                            onChangeText={(text) => setSearchText(text)}
+                            placeholderTextColor='#9CA3AF'
+                        />
                     </View>
-                ) : (
-                    <>
-                        <View className='search-bar p-2'>
-                            <TextInput
-                                className='border border-gray-200 rounded-xl p-4 bg-gray-50 text-gray-800 focus:border-gray-400'
-                                placeholder='Type Asset Name'
-                                value={searchText}
-                                onChangeText={(text) => setSearchText(text)}
-                                placeholderTextColor='#9CA3AF'
-                            />
-                        </View>
-                        {list.length !== 0 ? (
-                            <FlatList
-                                data={list}
-                                renderItem={renderItem}
-                                keyExtractor={(item) => item.id.toString()}
-                                extraData={selectedId}
-                            />
-                        ) : (
-                            <Text>No records</Text>
-                        )}
-                    </>
-                )}
-            </SafeAreaView>
-        </SafeAreaProvider>
+                    {list.length !== 0 ? (
+                        <FlatList
+                            data={list}
+                            renderItem={renderItem}
+                            keyExtractor={(item) => item.id.toString()}
+                            extraData={selectedId}
+                            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                        />
+                    ) : (
+                        <Text>No records</Text>
+                    )}
+                </>
+            )}
+        </View>
     );
 };
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        marginTop: StatusBar.currentHeight || 0,
-    },
-    item: {
-        padding: 20,
-        marginVertical: 8,
-        marginHorizontal: 16,
-    },
-    title: {
-        fontSize: 32,
-    },
-});
 
 export default AssetList;

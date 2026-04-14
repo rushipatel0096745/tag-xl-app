@@ -1,12 +1,13 @@
 import AppScreen from "@/components/common/AppScreen";
 import MaintenanceCheck from "@/components/search/MaintenanceCheck";
 import React from "react";
+import { View } from "react-native";
 
 const MaintenanceCheckView = () => {
     return (
-        <AppScreen>
+        <View style={{ flex: 1 }}>
             <MaintenanceCheck />
-        </AppScreen>
+        </View>
     );
 };
 

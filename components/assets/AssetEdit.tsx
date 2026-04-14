@@ -1,3 +1,4 @@
+import { validateFileSize } from "@/lib/utils";
 import { CreateLocation, GetAsset, GetLocationList, UpdateAsset } from "@/services/asset";
 import {
     GetMaintenanceTemplateAssetList,
@@ -23,7 +24,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import NativeDatePickerInput from "../common/NativeDateTimePicker";
+import NativeDatePickerInput, { formatDate } from "../common/NativeDateTimePicker";
 import NativeDropdown from "../common/NativeDropdown";
 import UnassignTagModal from "./UnassignTagModal";
 
@@ -55,7 +56,7 @@ const AssetEdit = ({ id }: Props) => {
     const [third_party_file, setThirdPartyFile] = useState<UploadedFile>();
     const [start_date, setStartDate] = useState<Date | null>(null);
     const [end_date, setEndDate] = useState<Date | null>(null);
-    const [frequency, setFrequency] = useState<string | number>();
+    const [frequency, setFrequency] = useState<string | number>("");
 
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
@@ -295,6 +296,14 @@ const AssetEdit = ({ id }: Props) => {
         });
 
         if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const { valid, message } = validateFileSize(asset.fileSize);
+            if (!valid) {
+                Alert.alert("File Size Too Large", message);
+                return;
+            }
+
             addFile({
                 uri: result.assets[0].uri,
                 name: `photo_${Date.now()}.jpg`,
@@ -320,6 +329,14 @@ const AssetEdit = ({ id }: Props) => {
         });
 
         if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const { valid, message } = validateFileSize(asset.fileSize);
+            if (!valid) {
+                Alert.alert("File Size Too Large", message);
+                return;
+            }
+
             addFile({
                 uri: result.assets[0].uri,
                 name: result.assets[0].fileName ?? `image_${Date.now()}.jpg`,
@@ -336,6 +353,14 @@ const AssetEdit = ({ id }: Props) => {
             copyToCacheDirectory: true,
         });
         if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const { valid, message } = validateFileSize(asset.size);
+            if (!valid) {
+                Alert.alert("File Size Too Large", message);
+                return;
+            }
+
             addFile({
                 uri: result.assets[0].uri,
                 name: result.assets[0].name,
@@ -362,31 +387,6 @@ const AssetEdit = ({ id }: Props) => {
             },
         ]);
     };
-
-    function handleSelection(val: string | number) {
-        setFrequency(val);
-
-        // claculateExpiry();
-        if (!start_date) return;
-
-        const monthsToAdd = Number(val);
-        const newDate = new Date(start_date);
-        newDate.setMonth(newDate.getMonth() + monthsToAdd);
-        newDate.setDate(newDate.getDate() - 1);
-
-        setEndDate(newDate);
-    }
-
-    function claculateExpiry() {
-        if (start_date && frequency && frequency !== "custom") {
-            const monthsToAdd = Number(frequency);
-            const newDate = new Date(start_date);
-            newDate.setMonth(newDate.getMonth() + monthsToAdd);
-            newDate.setDate(newDate.getDate() - 1);
-
-            setEndDate(newDate);
-        }
-    }
 
     async function loadData() {
         try {
@@ -420,14 +420,6 @@ const AssetEdit = ({ id }: Props) => {
         { label: "Inactive", value: "0" },
     ];
 
-    if (loading) {
-        return (
-            <View className='flex-1 justify-center items-center'>
-                <Text>Loading...</Text>
-            </View>
-        );
-    }
-
     const customDropdownOptions = [
         { label: "1 Months", value: "1" },
         { label: "3 Months", value: "3" },
@@ -435,6 +427,34 @@ const AssetEdit = ({ id }: Props) => {
         { label: "12 Months", value: "12" },
         { label: "Custom", value: "custom" },
     ];
+
+    function handleFrequencySelection(item: string) {
+        console.log("Selected item: ", item);
+        setFrequency(item);
+    }
+
+    useEffect(() => {
+        if (!start_date || !frequency || frequency === "custom") return;
+
+        const calculated = new Date(start_date);
+        calculated.setMonth(calculated.getMonth() + parseInt(frequency as string));
+        calculated.setDate(calculated.getDate() - 1);
+        setEndDate(calculated);
+    }, [start_date, frequency]);
+
+    useEffect(() => {
+        if (frequency === "custom") {
+            setEndDate(null);
+        }
+    }, [frequency]);
+
+    if (loading) {
+        return (
+            <View className='flex-1 justify-center items-center'>
+                <Text>Loading...</Text>
+            </View>
+        );
+    }
 
     return (
         <View className='main p-4 flex flex-col gap-4 justify-between'>
@@ -755,7 +775,7 @@ const AssetEdit = ({ id }: Props) => {
                                 value={start_date}
                                 onChange={(date: Date) => {
                                     setStartDate(date);
-                                    claculateExpiry();
+                                    if (frequency !== "custom") setEndDate(null);
                                 }}
                                 maximumDate={new Date()}
                             />
@@ -764,7 +784,7 @@ const AssetEdit = ({ id }: Props) => {
                         <View>
                             <NativeDropdown
                                 data={customDropdownOptions}
-                                onChange={(item) => handleSelection(item)}
+                                onChange={(item) => handleFrequencySelection(item)}
                                 value={frequency}
                                 placeholder='Select the Frequency'
                             />
@@ -776,16 +796,14 @@ const AssetEdit = ({ id }: Props) => {
                                 {frequency === "custom" ? (
                                     <NativeDatePickerInput
                                         value={end_date}
-                                        onChange={setEndDate}
+                                        onChange={(date) => setEndDate(date)}
                                         minimumDate={start_date}
                                     />
                                 ) : (
                                     <>
-                                        <View className='flex-row items-center bg-gray-100 border border-gray-300 rounded-xl px-4 py-3 gap-3 opacity-70'>
-                                            <Text className='flex-1 text-[15px] tracking-wide'>
-                                                {end_date
-                                                    ? end_date.toLocaleDateString("en-GB") // dd/mm/yyyy
-                                                    : "--"}
+                                        <View className='border border-gray-200 rounded-xl p-3 bg-gray-50'>
+                                            <Text className='text-gray-800'>
+                                                {end_date ? formatDate(end_date) : "Calculating..."}
                                             </Text>
                                         </View>
                                     </>

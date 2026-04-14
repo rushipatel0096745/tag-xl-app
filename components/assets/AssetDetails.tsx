@@ -1,5 +1,5 @@
 import { useAuth } from "@/context/AuthContext";
-import { GetAsset, GetLocationList } from "@/services/asset";
+import { GetAsset } from "@/services/asset";
 import { AssetDetail, Question } from "@/types/Aseet";
 import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
@@ -28,7 +28,7 @@ const AssetDetails = ({ id }: { id: string }) => {
     const [loading, setLoading] = useState(true);
     const [preUseCollapsed, setPreUseCollapsed] = useState(true);
     const [maintenanceCollapsed, setMaintenanceCollapsed] = useState(true);
-    const [locations, setLocations] = useState()
+    const [locations, setLocations] = useState();
     const { user } = useAuth();
 
     async function fetchAsset() {
@@ -42,7 +42,7 @@ const AssetDetails = ({ id }: { id: string }) => {
             }
 
             if (!result.has_error) {
-                console.log(result.asset, null, 2);
+                // console.log(result.asset, null, 2);
                 setAsset(result?.asset);
             }
         } catch (err) {
@@ -147,7 +147,7 @@ const AssetDetails = ({ id }: { id: string }) => {
                                 contentFit='scale-down'
                             />
                         </View>
-{/* i want to render different lists from one parnet component based on search param  coming from other components in react native expo*/}
+
                         {/* asset-info */}
                         <View className='flex flex-col justify-between border rounded-xl border-gray-400'>
                             <View className='flex flex-row justify-between items-center border-b border-gray-400 py-2 px-4'>

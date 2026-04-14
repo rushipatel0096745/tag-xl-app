@@ -5,11 +5,14 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import { Tabs } from "expo-router";
 import { Home, Search, User } from "lucide-react-native";
 import { useRef } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabsLayout() {
     // const [openSheet, setOpenSheet] = useState(false);
     const sheetRef = useRef<BottomSheet>(null);
     const isOpenRef = useRef(false);
+
+    const insets = useSafeAreaInsets();
 
     const toggleSheet = () => {
         if (isOpenRef.current) {
@@ -29,8 +32,14 @@ export default function TabsLayout() {
                         borderTopLeftRadius: 20,
                         borderTopRightRadius: 20,
                         overflow: "hidden",
-                        position: "absolute",
+                        // position: "absolute",
                         paddingTop: 10,
+                        paddingBottom: 8,
+                        height: 60 + insets.bottom,
+                    },
+                    tabBarItemStyle: {
+                        alignItems: "center",
+                        justifyContent: "center",
                     },
                 }}>
                 <Tabs.Screen
@@ -51,6 +60,7 @@ export default function TabsLayout() {
                         tabBarIcon: ({ color }) => <Search color={color} />,
                         headerTitle: "Search Asset",
                         headerTitleAlign: "center",
+                        animation: "fade",
                     }}
                 />
 
@@ -62,7 +72,6 @@ export default function TabsLayout() {
                         headerTitleAlign: "center",
                     }}
                 />
-                
 
                 {/* <Tabs.Screen
                 name='modal-trigger'
@@ -114,6 +123,7 @@ export default function TabsLayout() {
                     options={{
                         title: "Profile",
                         tabBarIcon: ({ color }) => <User color={color} />,
+                        headerShown: false,
                     }}
                 />
 

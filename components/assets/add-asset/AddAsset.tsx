@@ -43,7 +43,6 @@ const AddAsset = () => {
     //             <TouchableOpacity onPress={() => router.replace("/(app)/(tabs)/home")}>
     //                 <ChevronLeft size={24} color='#000' />
     //             </TouchableOpacity>
-    console.table("🚀 ~ AddAsset ~ TouchableOpacity:", TouchableOpacity)
     //         ),
     //     });
     // }, [navigation]);

@@ -1,9 +1,10 @@
 import Dropdown from "@/components/common/Dropdown";
+import { validateFileSize } from "@/lib/utils";
 import { CreateLocation, GetLocationList } from "@/services/asset";
 import { Camera } from "expo-camera";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
-import { Camera as CameraIcon, FileText, ImageIcon, Upload, X } from "lucide-react-native";
+import { Camera as CameraIcon, FileText, FolderOpen, ImageIcon, Upload, X } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
     ActionSheetIOS,
@@ -39,7 +40,7 @@ type UploadedFile = {
 export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Props) => {
     const [locations, setLocations] = useState<Location[]>([]);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
-    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);  
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [location_name, setLocationName] = useState("");
     const [assignError, setAssignError] = useState("");
     const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
@@ -87,8 +88,18 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
             allowsEditing: true,
         });
         if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const { valid, message } = validateFileSize(asset.fileSize);
+
+            if (!valid) {
+                Alert.alert("File Size Too Large", message);
+                return;
+            }
+
             addFile({
-                uri: result.assets[0].uri,
+                // uri: result.assets[0].uri,
+                uri: asset.uri,
                 name: `photo_${Date.now()}.jpg`,
                 type: "image",
                 mimeType: "image/jpeg",
@@ -105,6 +116,15 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
             quality: 0.8,
         });
         if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const { valid, message } = validateFileSize(asset.fileSize);
+
+            if (!valid) {
+                Alert.alert("File Size Too Large", message);
+                return;
+            }
+
             addFile({
                 uri: result.assets[0].uri,
                 name: result.assets[0].fileName ?? `image_${Date.now()}.jpg`,
@@ -122,6 +142,15 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
             copyToCacheDirectory: true,
         });
         if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const { valid, message } = validateFileSize(asset.size);
+
+            if (!valid) {
+                Alert.alert("File Size Too Large", message);
+                return;
+            }
+
             addFile({
                 uri: result.assets[0].uri,
                 name: result.assets[0].name,
@@ -182,7 +211,9 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
                 onRequestClose={() => setIsUploadModalOpen(false)}
                 animationType='slide'
                 transparent>
-                <Pressable className='flex-1 justify-end bg-black/50' onPress={() => setIsUploadModalOpen(false)}>
+                <Pressable
+                    className='flex-1 justify-end bg-[rgba(0,0,0,0.5)]'
+                    onPress={() => setIsUploadModalOpen(false)}>
                     <View className='bg-white rounded-t-3xl p-6 gap-4'>
                         <Text className='text-center text-gray-400 text-sm font-medium tracking-wide uppercase'>
                             Add Image
@@ -212,7 +243,7 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
                             </View>
                         </TouchableOpacity>
 
-                        {/* <TouchableOpacity
+                        <TouchableOpacity
                             onPress={handleChooseFile}
                             className='flex-row items-center gap-4 p-4 bg-gray-50 rounded-2xl active:opacity-70'>
                             <View className='w-10 h-10 bg-[#263f94]/10 rounded-xl items-center justify-center'>
@@ -222,7 +253,7 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
                                 <Text className='font-semibold text-gray-800'>Choose a File</Text>
                                 <Text className='text-gray-400 text-xs mt-0.5'>Browse PDFs, docs & more</Text>
                             </View>
-                        </TouchableOpacity> */}
+                        </TouchableOpacity>
 
                         <TouchableOpacity
                             onPress={() => setIsUploadModalOpen(false)}
@@ -238,8 +269,16 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
                 visible={isLocationModalOpen}
                 onRequestClose={() => setIsLocationModalOpen(false)}
                 animationType='slide'
-                transparent>
-                <View className='flex-1 justify-center items-center bg-black/50'>
+                transparent={true}
+                statusBarTranslucent>
+                <View
+                    style={{
+                        flex: 1,
+                        backgroundColor: "rgba(0,0,0,0.5)",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        paddingHorizontal: 16,
+                    }}>
                     <View className='bg-white rounded-2xl p-4 mx-4 w-full max-w-md gap-4'>
                         <View className='flex-row justify-between items-center border-b border-gray-200 pb-3'>
                             <Text className='font-semibold text-[16px] text-gray-800'>Add New Location</Text>
@@ -361,18 +400,14 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
             {/* ── Navigation ── */}
             <View className='flex-row justify-between gap-2 mt-2'>
                 <TouchableOpacity
-                    className='py-2.5 px-3.5 border border-[#263f94] rounded-xl justify-center items-center h-9.5'
+                    className='py-3 px-4 border border-[#263f94] rounded-xl justify-center items-center'
                     onPress={prev}>
-                    
-                        <Text className='text-[#263f94] text-[14px] font-medium'>Back</Text>
-                   
+                    <Text className='text-[#263f94] text-[14px] font-medium'>Back</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                     className='bg-[#263f94] rounded-xl py-3 px-4 items-center self-end'
                     onPress={handleSave}>
-                   
-                        <Text className='text-white text-[14px] font-medium'>Continue</Text>
-                   
+                    <Text className='text-white text-[14px] font-medium'>Continue</Text>
                 </TouchableOpacity>
             </View>
         </View>

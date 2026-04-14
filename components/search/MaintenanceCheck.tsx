@@ -1,4 +1,5 @@
 import { useAuth } from "@/context/AuthContext";
+import { validateFileSize } from "@/lib/utils";
 import { GetAsset } from "@/services/asset";
 import { AssetDetail, Question } from "@/types/Aseet";
 import { Ionicons } from "@expo/vector-icons";
@@ -118,6 +119,14 @@ const MaintenanceCheck = () => {
             allowsEditing: true,
         });
         if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const { valid, message } = validateFileSize(asset.fileSize);
+            if (!valid) {
+                Alert.alert("File Size Too Large", message);
+                return;
+            }
+
             addFile({
                 uri: result.assets[0].uri,
                 name: `photo_${Date.now()}.jpg`,
@@ -136,6 +145,14 @@ const MaintenanceCheck = () => {
             quality: 0.8,
         });
         if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const { valid, message } = validateFileSize(asset.fileSize);
+            if (!valid) {
+                Alert.alert("File Size Too Large", message);
+                return;
+            }
+
             addFile({
                 uri: result.assets[0].uri,
                 name: result.assets[0].fileName ?? `image_${Date.now()}.jpg`,
@@ -153,6 +170,14 @@ const MaintenanceCheck = () => {
             copyToCacheDirectory: true,
         });
         if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const { valid, message } = validateFileSize(asset.size);
+            if (!valid) {
+                Alert.alert("File Size Too Large", message);
+                return;
+            }
+
             addFile({
                 uri: result.assets[0].uri,
                 name: result.assets[0].name,

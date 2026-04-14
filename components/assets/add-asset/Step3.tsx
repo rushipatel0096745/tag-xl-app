@@ -1,7 +1,9 @@
-import DateInput from "@/components/common/DateInput";
-import Dropdown from "@/components/common/Dropdown";
+import NativeDateTimePicker from "@/components/common/NativeDateTimePicker";
+import NativeDropdown from "@/components/common/NativeDropdown";
 import * as DocumentPicker from "expo-document-picker";
 // import { Image } from "expo-image";
+import NativeDatePickerInput, { formatDate as dateFormat } from "@/components/common/NativeDateTimePicker";
+import { validateFileSize } from "@/lib/utils";
 import * as ImagePicker from "expo-image-picker";
 import { CameraIcon, FolderOpen, ImageIcon, Upload, X } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
@@ -68,13 +70,48 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
         return match ? String(match) : "custom";
     }
 
-    const [startDate, setStartDate] = useState<Date | undefined>(parseDate(formData.third_party_start_date));
-    const [expiryDate, setExpiryDate] = useState<Date | undefined>(parseDate(formData.third_party_expiry_date));
-    const [customDate, setCustomDate] = useState<string | number>(() =>
+    // const [startDate, setStartDate] = useState<Date | undefined>(parseDate(formData.third_party_start_date));
+    // const [expiryDate, setExpiryDate] = useState<Date | undefined>(parseDate(formData.third_party_expiry_date));
+    // const [customDate, setCustomDate] = useState<string | number>(() =>
+    //     deriveCustomDate(formData.third_party_start_date, formData.third_party_expiry_date)
+    // );
+
+    const [startDate, setStartDate] = useState<Date | null>(parseDate(formData.third_party_start_date) || null);
+    const [expiryDate, setExpiryDate] = useState<Date | null>(parseDate(formData.third_party_expiry_date) || null);
+
+    const [frequency, setFrequency] = useState<string | number>(
         deriveCustomDate(formData.third_party_start_date, formData.third_party_expiry_date)
     );
 
-    // tracking upload zone
+    function handleFrequencySelection(item: string) {
+        setFrequency(item);
+
+        if (item === "custom") {
+            setExpiryDate(null);
+            updateForm("third_party_expiry_date", null);
+            return;
+        }
+
+        if (!startDate) return;
+
+        const calculated = new Date(startDate);
+        calculated.setMonth(calculated.getMonth() + parseInt(item));
+        setExpiryDate(calculated);
+        updateForm("third_party_expiry_date", calculated.toISOString().split("T")[0]);
+    }
+
+    function handleStartDateChange(date: Date) {
+        setStartDate(date);
+        updateForm("third_party_start_date", date.toISOString().split("T")[0]);
+
+        if (!frequency || frequency === "custom") return;
+
+        const calculated = new Date(date);
+        calculated.setMonth(calculated.getMonth() + parseInt(frequency as string));
+        setExpiryDate(calculated);
+        updateForm("third_party_expiry_date", calculated.toISOString().split("T")[0]);
+    }
+
     const activeTarget = useRef<"oem" | "third_party" | null>(null);
 
     const openUploadModal = (target: "oem" | "third_party") => {
@@ -110,27 +147,6 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
         }
     };
 
-    // const handleTakePhoto = async (fileType: "oem" | "third_party") => {
-    //     setIsUploadModalOpen(false);
-    //     const granted = await ImagePicker.requestCameraPermissionsAsync();
-    //     if (!granted) {
-    //         Alert.alert("Permission required", "Camera access is needed to take photos.");
-    //         return;
-    //     }
-    //     const result = await ImagePicker.launchCameraAsync({
-    //         quality: 0.8,
-    //         allowsEditing: true,
-    //     });
-    //     if (!result.canceled) {
-    //         addFile({
-    //             uri: result.assets[0].uri,
-    //             name: `photo_${Date.now()}.jpg`,
-    //             type: "image",
-    //             mimeType: "image/jpeg",
-    //         });
-    //     }
-    // };
-
     const handleTakePhoto = async (fileType: "oem" | "third_party") => {
         setIsUploadModalOpen(false);
 
@@ -152,6 +168,15 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
         });
 
         if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const { valid, message } = validateFileSize(asset.fileSize);
+
+            if (!valid) {
+                Alert.alert("File Size Too Large", message);
+                return;
+            }
+
             addFile({
                 uri: result.assets[0].uri,
                 name: `photo_${Date.now()}.jpg`,
@@ -170,6 +195,14 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
             quality: 0.8,
         });
         if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const { valid, message } = validateFileSize(asset.fileSize);
+            if (!valid) {
+                Alert.alert("File Size Too Large", message);
+                return;
+            }
+
             addFile({
                 uri: result.assets[0].uri,
                 name: result.assets[0].fileName ?? `image_${Date.now()}.jpg`,
@@ -187,6 +220,14 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
             copyToCacheDirectory: true,
         });
         if (!result.canceled) {
+            const asset = result.assets[0];
+
+            const { valid, message } = validateFileSize(asset.size);
+            if (!valid) {
+                Alert.alert("File Size Too Large", message);
+                return;
+            }
+
             addFile({
                 uri: result.assets[0].uri,
                 name: result.assets[0].name,
@@ -196,10 +237,10 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
         }
     };
 
-    useEffect(() => {
-        console.log("third_part_file: ", third_party_file);
-        console.log("OEM file: ", OEMfile);
-    }, [third_party_file, OEMfile]);
+    // useEffect(() => {
+    //     console.log("third_part_file: ", third_party_file);
+    //     console.log("OEM file: ", OEMfile);
+    // }, [third_party_file, OEMfile]);
 
     function handleDate(date_type: "start" | "expiry", val: Date) {
         if (date_type === "start") {
@@ -242,40 +283,14 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
         console.log("form data: ", JSON.stringify(formData, null, 2));
         next();
     }
-
-    const customeDropdownOptions = [
+    
+    const customDropdownOptions = [
         { label: "1 Months", value: "1" },
         { label: "3 Months", value: "3" },
         { label: "6 Months", value: "6" },
         { label: "12 Months", value: "12" },
         { label: "Custom", value: "custom" },
     ];
-
-    function handleCustom(val: string | number) {
-        setCustomDate(val);
-
-        if (val === "custom") {
-            setExpiryDate(undefined);
-            updateForm("third_party_expiry_date", undefined);
-            return;
-        }
-
-        if (!startDate) return;
-
-        const monthsToAdd = Number(val);
-        const newDate = new Date(startDate);
-        newDate.setMonth(newDate.getMonth() + monthsToAdd);
-        newDate.setDate(newDate.getDate() - 1);
-
-        setExpiryDate(newDate);
-        updateForm("third_party_expiry_date", newDate.toISOString().split("T")[0]);
-    }
-
-    useEffect(() => {
-        if (customDate && customDate !== "custom") {
-            handleCustom(customDate);
-        }
-    }, [startDate]);
 
     const OEMCertificateURI = OEMfile?.uri || formData.oem_certificate?.uri;
     const ThirdPartyCertificateURI = third_party_file?.uri || formData.third_party_certificate?.uri;
@@ -410,58 +425,43 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
 
                     {(third_party_file || formData.third_party_certificate) && (
                         <View className='gap-3 mt-2'>
-                            <DateInput
-                                label='Start Date'
+                            <Text className='text-sm font-medium text-gray-700'>Start Date</Text>
+                            <NativeDateTimePicker
                                 value={startDate}
-                                onChange={(date: Date) => {
-                                    setStartDate(date);
-                                    handleDate("start", date);
-                                }}
+                                onChange={handleStartDateChange}
+                                maximumDate={new Date()}
                             />
-                            {errors.third_party_start_date && (
-                                <Text className='text-red-500 text-sm'>{errors.third_party_start_date}</Text>
-                            )}
 
                             <View className='gap-1'>
                                 <Text className='text-sm font-medium text-gray-700'>Select Frequency</Text>
-                                <Dropdown
-                                    onChange={(val: string | number) => handleCustom(val)}
-                                    options={customeDropdownOptions}
-                                    value={customDate}
-                                    placeholder='Select frequency'
+                                <NativeDropdown
+                                    data={customDropdownOptions}
+                                    onChange={handleFrequencySelection}
+                                    value={frequency}
+                                    placeholder='Select the Frequency'
                                 />
                             </View>
 
-                            {customDate && startDate && (
-                                <View className='gap-1'>
-                                    {customDate !== "custom" ? (
-                                        <View className='gap-1'>
-                                            <Text className='text-sm font-medium text-gray-700'>Expiry Date</Text>
-                                            <View className='border border-gray-200 rounded-xl p-4 bg-gray-100 flex-row items-center justify-between'>
-                                                <Text className='text-gray-800'>
-                                                    {expiryDate
-                                                        ? expiryDate.toLocaleDateString("en-GB", {
-                                                              day: "2-digit",
-                                                              month: "short",
-                                                              year: "numeric",
-                                                          })
-                                                        : "—"}
-                                                </Text>
-                                            </View>
-                                        </View>
-                                    ) : (
-                                        <DateInput
-                                            label='Expiry Date'
+                            {startDate && frequency && (
+                                <View className='flex-col gap-2'>
+                                    <Text className='text-sm font-medium text-gray-700'>Expiry Date: </Text>
+                                    {frequency === "custom" ? (
+                                        <NativeDatePickerInput
                                             value={expiryDate}
-                                            onChange={(date: Date) => {
+                                            onChange={(date) => {
                                                 setExpiryDate(date);
-                                                handleDate("expiry", date);
+                                                updateForm("third_party_expiry_date", date.toISOString().split("T")[0]);
                                             }}
                                             minimumDate={startDate}
                                         />
-                                    )}
-                                    {errors.third_party_expiry_date && (
-                                        <Text className='text-red-500 text-sm'>{errors.third_party_expiry_date}</Text>
+                                    ) : (
+                                        <>
+                                            <View className='border border-gray-200 rounded-xl p-3 bg-gray-50'>
+                                                <Text className='text-gray-800'>
+                                                    {expiryDate ? dateFormat(expiryDate) : "Calculating..."}
+                                                </Text>
+                                            </View>
+                                        </>
                                     )}
                                 </View>
                             )}
@@ -472,7 +472,7 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
                 {/*  Navigation  */}
                 <View className='flex-row justify-between gap-2 mt-2'>
                     <TouchableOpacity
-                        className='py-2.5 px-3.5 border border-[#263f94] rounded-xl justify-center items-center h-9.5'
+                        className='py-3 px-4 border border-[#263f94] rounded-xl justify-center items-center'
                         onPress={prev}>
                         <Text className='text-[#263f94] text-[14px] font-medium'>Back</Text>
                     </TouchableOpacity>

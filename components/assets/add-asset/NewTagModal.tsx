@@ -68,7 +68,7 @@ const NewTagModal: React.FC<CustomeModalProp> = ({ visible, onRequestClose, upda
 
     return (
         <Modal visible={visible} onRequestClose={onClose} animationType='slide' transparent={true}>
-            <View className='flex-1 justify-center items-center bg-black/50'>
+            <View className='flex-1 justify-center items-center bg-[rgba(0,0,0,0.5)]'>
                 <View className='bg-white rounded-2xl p-4 mx-4 w-full max-w-md flex flex-col gap-4'>
                     {/* Header */}
                     <View className='flex flex-row justify-between items-center border-b border-gray-200 pb-3'>

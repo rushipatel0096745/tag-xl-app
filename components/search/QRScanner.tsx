@@ -1,13 +1,24 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { CameraView, FlashMode, useCameraPermissions } from "expo-camera";
-import { useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 
-export default function QRScanner({ onScan }: { onScan: (uid: string) => void }) {
+export default function QRScanner({ onScan }: { onScan: (uid: string, resetScanner: () => void) => void }) {
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
     const [flash, setFlash] = useState<FlashMode>("off");
+
+    useFocusEffect(
+        useCallback(() => {
+            setScanned(false);
+        }, [])
+    );
+
+    const resetScanner = () => {
+        setScanned(false);
+    };
 
     if (!permission) return <Text>Loading...</Text>;
 
@@ -23,21 +34,30 @@ export default function QRScanner({ onScan }: { onScan: (uid: string) => void })
     const handleScan = ({ data }: { data: string }) => {
         if (scanned) return;
 
-        let parsedData: { uid?: string };
+        // let parsedData: { uid?: string };
+        let parsedData: any;
         try {
-            parsedData = JSON.parse(data);
+            // parsedData = JSON.parse(data);
+            parsedData = data;
         } catch {
             Alert.alert("Invalid QR", "Could not parse QR code data.");
+            router.replace("/(app)/(tabs)/home");
             return;
         }
 
-        if (!parsedData.uid) {
-            Alert.alert("Invalid QR", "UID not found in QR code.");
-            return;
-        }
+        // if (!parsedData.uid) {
+        //     Alert.alert("Invalid QR", "UID not found in QR code.");
+        //     router.replace("/(app)/(tabs)/home");
+        //     return;
+        // }
 
         setScanned(true);
-        onScan(parsedData.uid);
+
+        
+        setTimeout(() => {
+            // onScan(data);
+            onScan(data, resetScanner);
+        }, 300);
     };
 
     const handleFlash = () => {
@@ -50,7 +70,9 @@ export default function QRScanner({ onScan }: { onScan: (uid: string) => void })
                 style={{ flex: 1 }}
                 barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
                 onBarcodeScanned={scanned ? undefined : handleScan}
-                flash={flash}
+                // flash={flash}
+                enableTorch={flash === "on"}
+                // torch={flash === "on"}
             />
 
             <View className='absolute inset-0'>

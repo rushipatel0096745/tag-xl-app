@@ -23,7 +23,7 @@ export default function Index() {
     }, []);
 
     return (
-        <View className='flex items-center justify-center bg-white'>
+        <View className='flex bg-white' style={{flexGrow: 1, width: '100%'}}>
             <View>
                 <Dashboard />
             </View>

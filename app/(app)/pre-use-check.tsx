@@ -1,12 +1,13 @@
 import AppScreen from "@/components/common/AppScreen";
 import PreUseCheck from "@/components/search/PreUseCheck";
 import React from "react";
+import { View } from "react-native";
 
 const PreUseCheckView = () => {
     return (
-        <AppScreen>
+        <View style={{ flex: 1 }}>
             <PreUseCheck />
-        </AppScreen>
+        </View>
     );
 };
 

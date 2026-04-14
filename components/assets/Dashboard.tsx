@@ -25,6 +25,7 @@ const initialDashboardData: DashboardData = {
 
 const Dashboard = () => {
     const [dashboardData, setDashboardData] = useState<DashboardData>(initialDashboardData);
+
     const fetchDashbordData = async () => {
         const result = await GetDashboardData();
 
@@ -53,7 +54,7 @@ const Dashboard = () => {
                         <Text className='text-lg'>Total Assets</Text>
                     </View>
                 </TouchableOpacity>
-
+                
                 <TouchableOpacity
                     className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl'
                     onPress={() =>

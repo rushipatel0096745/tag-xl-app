@@ -12,7 +12,12 @@ const SearchAsset = () => {
     const [tab, setTab] = useState<TabType>("manual");
     const [UID, setUID] = useState("");
 
-    async function checkTagAssigned(uid: string) {
+    let navigation = false;
+
+    async function checkTagAssigned(uid: string, resetScanner?: () => void) {
+        if (navigation) return;
+        navigation = true;
+
         const result = await CheckTagAssigned(uid);
 
         if (result.has_error && result.error_code == "RECORD_ALREADY_USED") {
@@ -22,12 +27,21 @@ const SearchAsset = () => {
 
         if (result.has_error && result.error_code == "RECORD_NOT_FOUND") {
             // router.push({ pathname: "/(app)/(tabs)/search-asset/asset-detail", params: { uid: uid } });
-            Alert.alert("Enter valid UID");
+            Alert.alert("Invalid UID", "", [
+                {
+                    text: "OK",
+                    onPress: () => {
+                        navigation = false;
+                        resetScanner?.();
+                    },
+                }
+            ]);
             return;
         }
 
         if (!result.has_error) {
             Alert.alert("Server isn't responding, please try after some time");
+            router.replace("/(app)/(tabs)/home");
         }
     }
 
@@ -68,9 +82,12 @@ const SearchAsset = () => {
             {tab === "scan" && (
                 <View className='flex-1'>
                     <QRScanner
-                        onScan={(uid) => {
+                        onScan={(uid, resetScanner) => {
                             setUID(uid);
-                            checkTagAssigned(uid);
+
+                            setTimeout(() => {
+                                checkTagAssigned(uid, resetScanner);
+                            }, 300);
                         }}
                     />
                 </View>
@@ -82,7 +99,7 @@ const SearchAsset = () => {
                             <Text className='text-lg font-semibold mb-1'>Enter Tag UID:</Text>
 
                             <TextInput
-                                className='border rounded-lg border-gray-400 bg-white p-2 text-lg'
+                                className='border rounded-lg border-gray-400 text-black bg-white p-2 text-lg'
                                 placeholder='Enter UID'
                                 onChangeText={(val) => setUID(val)}
                             />

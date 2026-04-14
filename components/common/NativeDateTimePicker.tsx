@@ -23,7 +23,7 @@ interface DatePickerInputProps {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const formatDate = (date: Date): string => {
+export const formatDate = (date: Date): string => {
     const dd = String(date.getDate()).padStart(2, "0");
     const mm = String(date.getMonth() + 1).padStart(2, "0");
     const yyyy = date.getFullYear();
@@ -84,13 +84,15 @@ const NativeDateTimePicker: React.FC<DatePickerInputProps> = ({
 
             <TouchableOpacity
                 activeOpacity={0.7}
-                style={[styles.inputBox, show && styles.inputBoxFocused]}
+                // style={[styles.inputBox, show && styles.inputBoxFocused]}
+                className="border border-gray-200 rounded-xl p-3 bg-gray-50 text-gray-800"
                 onPress={handleOpen}
                 accessibilityRole='button'
                 accessibilityLabel={label ?? "Date picker"}
                 accessibilityHint='Opens a date selector'>
 
-                <Text style={[styles.inputText, !displayValue && styles.placeholder]}>
+                {/* <Text style={[styles.inputText, !displayValue && styles.placeholder]}> */}
+                <Text className="">
                     {displayValue ?? placeholder}
                 </Text>
 

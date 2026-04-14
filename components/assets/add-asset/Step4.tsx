@@ -68,7 +68,7 @@ const Step4 = ({ next, prev, updateForm, validate, formData, handleSubmit, error
                         placeholder='Select Manual Template'
                     />
                 </View>
-                
+
                 {/* Preuse check template */}
                 <View>
                     <PreUseTemplate
@@ -92,7 +92,7 @@ const Step4 = ({ next, prev, updateForm, validate, formData, handleSubmit, error
                 {/* Navigation */}
                 <View className='flex-row justify-between gap-2 mt-2'>
                     <TouchableOpacity
-                        className='py-2.5 px-3.5 border border-[#263f94] rounded-xl justify-center items-center h-9.5'
+                        className='py-3 px-4 border border-[#263f94] rounded-xl justify-center items-center'
                         onPress={prev}>
                         <Text className='text-[#263f94] text-[14px] font-medium'>Back</Text>
                     </TouchableOpacity>
