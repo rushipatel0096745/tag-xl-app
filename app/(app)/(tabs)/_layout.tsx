@@ -1,41 +1,170 @@
-// app/(app)/(tabs)/_layout.tsx
-
-import AppBottomSheet from "@/components/AppBottomSheet";
-import BottomSheet from "@gorhom/bottom-sheet";
-import { Tabs } from "expo-router";
+import SearchAsset from "@/components/search/SearchAsset";
+import { BottomTabBar } from "@react-navigation/bottom-tabs";
+import { Tabs, useGlobalSearchParams, useRouter } from "expo-router";
 import { Home, Search, User } from "lucide-react-native";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Dimensions, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+const SCREEN_HEIGHT = Dimensions.get("window").height;
+
+type TabType = "nfc" | "scan" | "manual";
+
 export default function TabsLayout() {
-    // const [openSheet, setOpenSheet] = useState(false);
-    const sheetRef = useRef<BottomSheet>(null);
-    const isOpenRef = useRef(false);
+    const params = useGlobalSearchParams();
+    const router = useRouter();
 
     const insets = useSafeAreaInsets();
+    const TAB_BAR_HEIGHT = 60 + insets.bottom;
+    const SHEET_HEIGHT = SCREEN_HEIGHT * 0.55;
 
-    const toggleSheet = () => {
-        if (isOpenRef.current) {
-            sheetRef.current?.close();
-        } else {
-            sheetRef.current?.expand();
+    const slideAnim = useRef(new Animated.Value(SHEET_HEIGHT)).current;
+    const [isOpen, setIsOpen] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    const [sheetConfig, setSheetConfig] = useState({
+        initialTab: "manual" as TabType,
+        allowedTabs: ["nfc", "scan", "manual"] as TabType[],
+        sheetMode: "DEFAULT" as "ADD_ASSET" | "EDIT_ASSET" | "DEFAULT"
+    });
+
+    useEffect(() => {
+        if (params.sheetOpen) {
+            openSheet({
+                initialTab: params.sheetOpen as "nfc" | "scan" | "manual",
+                allowedTabs: [params.sheetAllowed as any],
+                sheetMode: params.sheetMode as "ADD_ASSET" | "EDIT_ASSET" | "DEFAULT" || "DEFAULT",
+            });
+
+            router.setParams({
+                sheetOpen: undefined,
+                sheetAllowed: undefined,
+                sheetMode: undefined,
+            });
         }
-        isOpenRef.current = !isOpenRef.current;
+    }, [params.sheetOpen]);
+
+    // const openSheet = () => {
+    //     if (isOpen) {
+    //         closeSheet();
+    //         return;
+    //     }
+    //     setMounted(true);
+    //     setIsOpen(true);
+    //     Animated.spring(slideAnim, {
+    //         toValue: 0,
+    //         useNativeDriver: true,
+    //         damping: 20,
+    //         stiffness: 150,
+    //     }).start();
+    // };
+
+    const openSheet = (config?: { initialTab?: TabType; allowedTabs?: TabType[], sheetMode?: "ADD_ASSET" | "EDIT_ASSET" | "DEFAULT" }) => {
+        if (isOpen) {
+            closeSheet();
+            return;
+        }
+
+        if (config) {
+            setSheetConfig({
+                initialTab: config.initialTab ?? "manual",
+                allowedTabs: config.allowedTabs ?? ["nfc", "scan", "manual"],
+                sheetMode: config.sheetMode ?? "DEFAULT"
+            });
+        }
+
+        setMounted(true);
+        setIsOpen(true);
+
+        Animated.spring(slideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            damping: 20,
+            stiffness: 150,
+        }).start();
+    };
+
+    const closeSheet = () => {
+        Animated.timing(slideAnim, {
+            toValue: SHEET_HEIGHT,
+            duration: 300,
+            useNativeDriver: true,
+        }).start(() => {
+            setIsOpen(false);
+            setMounted(false);
+        });
     };
 
     return (
-        <>
+        <View style={{ flex: 1 }}>
             <Tabs
+                tabBar={(props) => (
+                    <View pointerEvents='box-none'>
+                        {isOpen && (
+                            <TouchableOpacity
+                                activeOpacity={1}
+                                onPress={closeSheet}
+                                style={{
+                                    position: "absolute",
+                                    bottom: TAB_BAR_HEIGHT,
+                                    left: 0,
+                                    right: 0,
+                                    height: SCREEN_HEIGHT,
+                                    backgroundColor: "rgba(0,0,0,0.4)",
+                                }}
+                            />
+                        )}
+                        {mounted && (
+                            <View
+                                style={{
+                                    position: "absolute",
+                                    bottom: TAB_BAR_HEIGHT,
+                                    left: 0,
+                                    right: 0,
+                                    height: SCREEN_HEIGHT,
+                                }}
+                                pointerEvents='box-none'>
+                                <Animated.View
+                                    style={{
+                                        position: "absolute",
+                                        left: 0,
+                                        right: 0,
+                                        bottom: -100,
+                                        height: SHEET_HEIGHT + 100,
+                                        paddingBottom: 100,
+                                        transform: [{ translateY: slideAnim }],
+                                        backgroundColor: "#fff",
+                                        borderTopLeftRadius: 20,
+                                        borderTopRightRadius: 20,
+                                        shadowColor: "#000",
+                                        shadowOffset: { width: 0, height: -4 },
+                                        shadowOpacity: 0.1,
+                                        shadowRadius: 12,
+                                        elevation: 10,
+                                        paddingVertical: 12,
+                                    }}>
+                                    <SearchAsset
+                                        onClose={closeSheet}
+                                        initialTab={sheetConfig.initialTab}
+                                        allowedTabs={sheetConfig.allowedTabs}
+                                        sheetMode={sheetConfig.sheetMode}
+                                    />
+                                </Animated.View>
+                            </View>
+                        )}
+                        <BottomTabBar {...props} />
+                    </View>
+                )}
                 screenOptions={{
                     headerShown: true,
                     tabBarStyle: {
                         borderTopLeftRadius: 20,
                         borderTopRightRadius: 20,
+                        // borderColor: "black",
                         overflow: "hidden",
-                        // position: "absolute",
                         paddingTop: 10,
                         paddingBottom: 8,
-                        height: 60 + insets.bottom,
+                        height: TAB_BAR_HEIGHT,
                     },
                     tabBarItemStyle: {
                         alignItems: "center",
@@ -57,10 +186,10 @@ export default function TabsLayout() {
                     name='search-asset/index'
                     options={{
                         title: "Search",
-                        tabBarIcon: ({ color }) => <Search color={color} />,
-                        headerTitle: "Search Asset",
-                        headerTitleAlign: "center",
-                        animation: "fade",
+                        tabBarIcon: ({ color }) => <Search color={isOpen ? "#263f94" : color} />,
+                        tabBarButton: (props) => (
+                            <TouchableOpacity {...(props as any)} onPress={openSheet} style={props.style} />
+                        ),
                     }}
                 />
 
@@ -73,51 +202,6 @@ export default function TabsLayout() {
                     }}
                 />
 
-                {/* <Tabs.Screen
-                name='modal-trigger'
-                options={{
-                    title: "Modal",
-                    tabBarButton: (props) => (
-                        <TouchableOpacity {...(props as any)} onPress={() => router.push("/modal")}>
-                            {props.children}
-                        </TouchableOpacity>
-                    ),
-                }}
-            /> */}
-
-                {/* <Tabs.Screen
-                    name='my-modal'
-                    options={{
-                        tabBarButton: () => (
-                            <TouchableOpacity onPress={() => router.push("/(app)/(tabs)/my-modal")}>
-                                <Text>Open Modal</Text>
-                            </TouchableOpacity>
-                        ),
-                    }}
-                /> */}
-                {/* <Tabs.Screen
-                    name='modal-trigger'
-                    options={{
-                        title: "Modal",
-                        tabBarButton: () => (
-                            <TouchableOpacity
-                                onPress={toggleSheet}
-                                style={{
-                                    top: -30,
-                                    width: 60,
-                                    height: 60,
-                                    borderRadius: 30,
-                                    backgroundColor: "#2563eb",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    elevation: 5,
-                                }}>
-                                <Plus size={28} color='white' />
-                            </TouchableOpacity>
-                        ),
-                    }}
-                /> */}
-
                 <Tabs.Screen
                     name='profile'
                     options={{
@@ -126,24 +210,7 @@ export default function TabsLayout() {
                         headerShown: false,
                     }}
                 />
-
-                <Tabs.Screen
-                    name='my-modal'
-                    options={{
-                        href: null,
-                        headerShown: false,
-                    }}
-                />
-
-                <Tabs.Screen
-                    name='modal-trigger'
-                    options={{
-                        href: null,
-                        headerShown: false,
-                    }}
-                />
             </Tabs>
-            <AppBottomSheet ref={sheetRef} />
-        </>
+        </View>
     );
 }

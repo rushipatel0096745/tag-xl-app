@@ -1,7 +1,6 @@
-import { GetDashboardData } from "@/services/asset";
 import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
 export interface DashboardData {
     total_assets: number;
@@ -23,25 +22,25 @@ const initialDashboardData: DashboardData = {
     total_alerts: 0,
 };
 
-const Dashboard = () => {
-    const [dashboardData, setDashboardData] = useState<DashboardData>(initialDashboardData);
+const Dashboard = ({ data }: { data: DashboardData }) => {
+    // const [dashboardData, setDashboardData] = useState<DashboardData>(data || initialDashboardData);
 
-    const fetchDashbordData = async () => {
-        const result = await GetDashboardData();
+    // const fetchDashbordData = async () => {
+    //     const result = await GetDashboardData();
 
-        if (result.has_error) {
-            Alert.alert("Error", result.message);
-            return;
-        }
+    //     if (result.has_error) {
+    //         Alert.alert("Error", result.message);
+    //         return;
+    //     }
 
-        const { has_error, message, ...dashboardFields } = result;
+    //     const { has_error, message, ...dashboardFields } = result;
 
-        setDashboardData(dashboardFields);
-    };
+    //     setDashboardData(dashboardFields);
+    // };
 
-    useEffect(() => {
-        fetchDashbordData();
-    }, []);
+    // useEffect(() => {
+    //     fetchDashbordData();
+    // }, []);
 
     return (
         <View className='main mt-4 mx-3 flex flex-col justify-between gap-2'>
@@ -50,11 +49,11 @@ const Dashboard = () => {
                     className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl'
                     onPress={() => router.push("/(app)/(tabs)/home/asset/asset-list")}>
                     <View className='flex flex-col gap-1'>
-                        <Text className='text-2xl font-bold text-[#263f94]'>{dashboardData.total_assets}</Text>
+                        <Text className='text-2xl font-bold text-[#263f94]'>{data.total_assets}</Text>
                         <Text className='text-lg'>Total Assets</Text>
                     </View>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                     className='w-[48%] bg-gray-200 p-4 mb-3 rounded-xl'
                     onPress={() =>
@@ -64,7 +63,7 @@ const Dashboard = () => {
                         })
                     }>
                     <View className='flex flex-col gap-1'>
-                        <Text className='text-2xl font-bold text-[#263f94]'>{dashboardData.total_maintenance_due}</Text>
+                        <Text className='text-2xl font-bold text-[#263f94]'>{data.total_maintenance_due}</Text>
                         <Text className='text-lg'>Maintenance Check Due</Text>
                     </View>
                 </TouchableOpacity>
@@ -79,7 +78,7 @@ const Dashboard = () => {
                     }>
                     <View className='flex flex-col gap-1'>
                         <Text className='text-2xl font-bold text-[#263f94]'>
-                            {dashboardData.total_certificate_expiry}
+                            {data.total_certificate_expiry}
                         </Text>
                         <Text className='text-lg'>Recertification Needed</Text>
                     </View>
@@ -94,7 +93,7 @@ const Dashboard = () => {
                         })
                     }>
                     <View className='flex flex-col gap-1'>
-                        <Text className='text-2xl font-bold text-[#263f94]'>{dashboardData.total_maintenance}</Text>
+                        <Text className='text-2xl font-bold text-[#263f94]'>{data.total_maintenance}</Text>
                         <Text className='text-lg'>Asset In Maintenance</Text>
                     </View>
                 </TouchableOpacity>
@@ -108,7 +107,7 @@ const Dashboard = () => {
                         })
                     }>
                     <View className='flex flex-col gap-1'>
-                        <Text className='text-2xl font-bold text-[#263f94]'>{dashboardData.total_failures}</Text>
+                        <Text className='text-2xl font-bold text-[#263f94]'>{data.total_failures}</Text>
                         <Text className='text-lg'>Asset Failure</Text>
                     </View>
                 </TouchableOpacity>
@@ -122,7 +121,7 @@ const Dashboard = () => {
                         })
                     }>
                     <View className='flex flex-col gap-1'>
-                        <Text className='text-2xl font-bold text-[#263f94]'>{dashboardData.total_alerts}</Text>
+                        <Text className='text-2xl font-bold text-[#263f94]'>{data.total_alerts}</Text>
                         <Text className='text-lg'> Total Alerts</Text>
                     </View>
                 </TouchableOpacity>

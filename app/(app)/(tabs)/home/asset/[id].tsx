@@ -15,3 +15,4 @@ const AssetItemDetails = () => {
 };
 
 export default AssetItemDetails;
+    

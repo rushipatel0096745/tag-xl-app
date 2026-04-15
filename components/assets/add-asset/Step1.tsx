@@ -1,5 +1,6 @@
 import { CheckTagAssigned } from "@/services/asset";
-import React, { useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
 import NewTagModal from "./NewTagModal";
 
@@ -28,6 +29,34 @@ const Step1 = ({ next, updateForm, validate, errors, formData }: Props) => {
         setTagId(value);
         updateForm("uid", value);
     };
+
+    const openQRScanner = () => {
+        router.setParams({
+            sheetOpen: "scan",
+            sheetAllowed: "scan",
+            sheetMode: "ADD_ASSET",
+        });
+    };
+
+    const openRFIDScanner = () => {
+        router.setParams({
+            sheetOpen: "nfc",
+            sheetAllowed: "nfc",
+            sheetMode: "ADD_ASSET",
+        });
+    };
+
+    const params = useLocalSearchParams();
+
+    useEffect(() => {
+        if (params.scannedUID) {
+            handleUidChange(params.scannedUID as string);
+
+            router.setParams({
+                scannedUID: undefined,
+            });
+        }
+    }, [params.scannedUID]);
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
@@ -77,7 +106,11 @@ const Step1 = ({ next, updateForm, validate, errors, formData }: Props) => {
                         return (
                             <Pressable
                                 key={option.value}
-                                onPress={() => updateForm("tag_type", option.value)}
+                                onPress={() => {
+                                    updateForm("tag_type", option.value);
+                                    if (option.value === "QR") openQRScanner();
+                                    if(option.value === "RFID") openRFIDScanner();
+                                }}
                                 style={{
                                     height: 38,
                                     paddingHorizontal: 12,

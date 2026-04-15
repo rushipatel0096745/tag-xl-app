@@ -16,7 +16,7 @@ type ItemProps = {
 
 const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => (
     <TouchableOpacity onPress={onPress} className='flex flex-row border-b border-gray-300 gap-2 p-2'>
-        <View className='img w-20'>
+        <View className='img w-16'>
             <Image
                 source={{ uri: `https://api.tagxl.com/${item?.asset.image}` }}
                 style={{ width: 50, height: 50 }}
@@ -24,13 +24,16 @@ const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => (
                 className='border-0 rounded-2xl'
             />
         </View>
-        <View className='content w-60 content-center'>
+        <View className='flex-1 justify-center'>
             <Text className='font-semibold'>{item.asset.name}</Text>
-            <Text className='color-gray-500'>{item.asset.batch_code}</Text>
+            <Text className='color-gray-500'>
+                Alert: 
+                <Text className="text-black">{item.alert_type.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}</Text>
+            </Text>
         </View>
-        <View className='content w-20 content-center'>
-            {item.status === 0 && (
-                <Text className='text-green-500 bg-green-100 rounded-full px-1 py-1 text-xs font-extrabold'>GOOD</Text>
+        <View className='justify-center items-end p-2'>
+            {item.status === 2 && (
+                <Text className='text-green-600 bg-green-200 rounded-full px-1 py-1 text-xs font-extrabold'>COMPLETED</Text>
             )}
         </View>
     </TouchableOpacity>

@@ -61,7 +61,7 @@ const UnassignTagModal = ({ visible, onRequestClose, onClose, uid, fetchAsset, e
 
     return (
         <Modal visible={visible} onRequestClose={onClose} animationType='slide' transparent={true}>
-            <View className='flex-1 justify-center items-center bg-black/50 px-4'>
+            <View className='flex-1 justify-center items-center bg-[rgb(0,0,0,0.5)] px-4'>
                 {/* Card */}
                 <View className='bg-white border rounded-2xl p-4 w-[90%] flex flex-col gap-4'>
                     {/* Header */}

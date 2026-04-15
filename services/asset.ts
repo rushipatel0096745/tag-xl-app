@@ -127,6 +127,19 @@ export const UnassignTag = async function (data: any) {
     return result;
 };
 
+export const AssignTag = async function (data: any) {
+    const result = await clientFetch("/company/tag/assigned-asset", {
+        method: "POST",
+        headers: {
+            ...(await getAuthHeaders()),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+
+    return result;
+};
+
 export const CheckTagAssigned = async function (tagId: string) {
     const result = await clientFetch("/company/tag/check-assigned", {
         method: "POST",

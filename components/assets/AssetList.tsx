@@ -23,22 +23,24 @@ type ItemProps = {
 };
 
 const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => (
-    <TouchableOpacity onPress={onPress} className='flex flex-row border-b border-gray-300 gap-2 p-2'>
-        <View className='img w-20'>
+    <TouchableOpacity onPress={onPress} className='flex flex-row items-center border-b border-gray-300 gap-3 p-3'>
+        <View className='w-16'>
             <Image
                 source={{ uri: `https://api.tagxl.com/${item?.image}` }}
                 style={{ width: 50, height: 50 }}
                 resizeMode='cover'
-                className='border-0 rounded-2xl'
+                className='rounded-xl'
             />
         </View>
-        <View className='content w-60 content-center'>
-            <Text className='font-semibold'>{item.name}</Text>
-            <Text className='color-gray-500'>{item.batch_code}</Text>
+
+        <View className='flex-1 justify-center'>
+            <Text className='font-semibold text-base'>{item.name}</Text>
+            <Text className='text-gray-500 text-sm'>{item.batch_code}</Text>
         </View>
-        <View className='content w-20 content-center'>
+
+        <View className='justify-center items-end'>
             {item.status === 0 && (
-                <Text className='text-green-500 bg-green-100 rounded-full px-1 py-1 text-xs font-extrabold'>GOOD</Text>
+                <Text className='text-green-600 bg-green-100 px-3 py-1 rounded-full text-xs font-semibold'>GOOD</Text>
             )}
         </View>
     </TouchableOpacity>

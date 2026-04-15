@@ -231,7 +231,7 @@ const AddAsset = () => {
                     errors={errors}
                     formData={formData}
                 />
-            )}
+            )}  
             {currentStep === 3 && (
                 <Step3
                     prev={prevStep}

@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
+import { router, useLocalSearchParams } from "expo-router";
 import { CameraIcon, FolderOpen, ImageIcon } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -26,6 +27,7 @@ import {
 } from "react-native";
 import NativeDatePickerInput, { formatDate } from "../common/NativeDateTimePicker";
 import NativeDropdown from "../common/NativeDropdown";
+import AssignTagModal from "./AssignTagModal";
 import UnassignTagModal from "./UnassignTagModal";
 
 type UploadedFile = {
@@ -43,6 +45,7 @@ type Props = {
 
 const AssetEdit = ({ id }: Props) => {
     const [asset, setAsset] = useState<AssetDetail>();
+    const [scannedUID, setScannedUID] = useState("");
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [userRole, setUserRole] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
@@ -448,6 +451,23 @@ const AssetEdit = ({ id }: Props) => {
         }
     }, [frequency]);
 
+    const params = useLocalSearchParams();
+
+    function handleScannedUIDChange(value: string) {
+        setScannedUID(value);
+        openAssignModal();
+    }
+
+    useEffect(() => {
+        if (params.scannedUID) {
+            handleScannedUIDChange(params.scannedUID as string);
+
+            router.setParams({
+                scannedUID: undefined,
+            });
+        }
+    }, [params.scannedUID]);
+
     if (loading) {
         return (
             <View className='flex-1 justify-center items-center'>
@@ -555,7 +575,7 @@ const AssetEdit = ({ id }: Props) => {
                 </View>
             </Modal>
 
-            {asset?.tag?.id && (
+            {asset?.tag?.id ? (
                 <UnassignTagModal
                     visible={isUnassignModalOpen}
                     onClose={() => setIsUnassignModalOpen(false)}
@@ -563,6 +583,22 @@ const AssetEdit = ({ id }: Props) => {
                     uid={asset?.tag?.uid}
                     error={setUnassignModalError}
                     fetchAsset={fetchAsset}
+                />
+            ) : (
+                <AssignTagModal
+                    onClose={() => {
+                        setIsAssignModalOpen(false);
+                        setScannedUID("");
+                    }}
+                    error={setAssignModalError}
+                    onRequestClose={() => {
+                        setIsAssignModalOpen(false);
+                        setScannedUID("");
+                    }}
+                    visible={isAssignModalOpen}
+                    assetId={parseInt(id)}
+                    fetchAsset={fetchAsset}
+                    scannedUID={scannedUID}
                 />
             )}
 
@@ -712,7 +748,7 @@ const AssetEdit = ({ id }: Props) => {
 
             <View className='flex-col gap-2'>
                 <Text className='text-[16px]'>Third Party Certificate</Text>
-                <View className='flex flex-col justify-between border rounded-xl border-gray-400'>
+                <View className='flex flex-col justify-between border rounded-xl border-gray-400  bg-white'>
                     {asset?.third_party_certificate && asset?.third_party_certificate.length > 0 && (
                         <View className='flex flex-row justify-between items-center border-b border-gray-400 py-2 px-4'>
                             <Text className='font-semibold text-[16px]'>Last Uploaded Certificate</Text>

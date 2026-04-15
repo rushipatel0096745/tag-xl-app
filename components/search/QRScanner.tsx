@@ -5,7 +5,9 @@ import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 
-export default function QRScanner({ onScan }: { onScan: (uid: string, resetScanner: () => void) => void }) {
+type Props = { onScan: (uid: string, resetScanner: () => void) => void };
+
+export default function QRScanner({ onScan }: Props) {
     const [permission, requestPermission] = useCameraPermissions();
     const [scanned, setScanned] = useState(false);
     const [flash, setFlash] = useState<FlashMode>("off");

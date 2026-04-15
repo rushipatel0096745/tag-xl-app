@@ -14,16 +14,6 @@ type Props = {
 export default function AppScreen({ children, scroll = false, loading = false }: Props) {
     const tabBarHeight = useBottomTabBarHeight();
 
-    // if (!scroll) {
-    //     return <SafeAreaView style={{ flex: 1 }}>{children}</SafeAreaView>;
-    // }
-
-    // return (
-    //     <SafeAreaView style={{ flex: 1 }}>
-    //         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>{children}</ScrollView>
-    //     </SafeAreaView>
-    // );
-
     return (
         <SafeAreaView style={{ flex: 1 }} edges={["left", "right"]}>
             {scroll ? (
@@ -31,7 +21,7 @@ export default function AppScreen({ children, scroll = false, loading = false }:
                     {children}
                 </ScrollView>
             ) : (
-                <View style={{ flex: 1, paddingBottom: tabBarHeight }}>{children}</View>
+                <View style={{ flex: 1, paddingBottom: 0 }}>{children}</View>
             )}
 
             {/* GLOBAL OVERLAY */}

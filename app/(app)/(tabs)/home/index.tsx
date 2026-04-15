@@ -1,32 +1,61 @@
 // app/(app)/(tabs)/home/index.tsx
 
-import Dashboard from "@/components/assets/Dashboard";
+import Dashboard, { DashboardData } from "@/components/assets/Dashboard";
 import { GetDashboardData } from "@/services/asset";
-import { useEffect } from "react";
-import { Alert, View } from "react-native";
+import { useEffect, useState } from "react";
+import { Alert, RefreshControl, ScrollView, View } from "react-native";
 
 export default function Index() {
-    const fetchDashbordData = async function () {
+    const initialDashboardData: DashboardData = {
+        total_assets: 0,
+        total_maintenance: 0,
+        total_certificate_expiry: 0,
+        total_failures: 0,
+        total_tag_available_of_use: 0,
+        total_maintenance_due: 0,
+        total_alerts: 0,
+    };
+
+    const [refreshing, setRefreshing] = useState(false);
+    const [dashboardData, setDashboardData] = useState<DashboardData>(initialDashboardData);
+
+    const fetchDashboardData = async () => {
         const result = await GetDashboardData();
+
         if (result.has_error) {
             Alert.alert("Error", result.message);
             return;
         }
 
-        if (!result.has_error) {
-            console.log("dashboard data: ", result);
-        }
+        const { has_error, message, ...dashboardFields } = result;
+
+        setDashboardData(dashboardFields);
     };
 
     useEffect(() => {
-        fetchDashbordData();
+        fetchDashboardData();
     }, []);
 
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchDashboardData();
+        setRefreshing(false);
+    };
     return (
-        <View className='flex bg-white' style={{flexGrow: 1, width: '100%'}}>
-            <View>
-                <Dashboard />
+        <ScrollView
+            className='flex-1'
+            style={{ flexGrow: 1, width: "100%" }}
+            refreshControl={
+                <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={onRefresh}
+                    colors={["#263f94"]}
+                    tintColor='#263f94'
+                />
+            }>
+            <View className='bg-white'>
+                <Dashboard data={dashboardData} />
             </View>
-        </View>
+        </ScrollView>
     );
 }
