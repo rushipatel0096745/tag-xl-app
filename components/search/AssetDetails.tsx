@@ -98,14 +98,14 @@ const AssetDetails = ({ uid }: { uid: string }) => {
             {asset?.last_pre_use_check && (
                 <View className='gap-2'>
                     <Text className='text-gray-600'>Last Pre-use Check: </Text>
-                    <Text className='text-lg'>{formatDateTime(asset.last_pre_use_check)}</Text>
+                    <Text className='text-lg'>{formatDateTime(asset?.last_pre_use_check)}</Text>
                 </View>
             )}
 
             {asset?.last_maintenance_check && (
                 <View className='gap-2'>
                     <Text className='text-gray-600'>Last Maintenance Check: </Text>
-                    <Text className='text-lg'>{formatDateTime(asset.last_maintenance_check)}</Text>
+                    <Text className='text-lg'>{formatDateTime(asset?.last_maintenance_check)}</Text>
                 </View>
             )}
 
@@ -113,16 +113,20 @@ const AssetDetails = ({ uid }: { uid: string }) => {
                 <Text className='text-gray-600'>Documents: </Text>
                 <View className='gap-2 p-2'>
                     <View className='items-center w-full'>
-                        <TouchableOpacity
-                            className='bg-[#263f94] rounded-xl py-3 px-4 items-center w-full'
-                            onPress={() =>
-                                downloadFile(
-                                    ("https://api.tagxl.com/" +
-                                        asset?.third_party_certificate[0].third_party_certificate) as string
-                                )
-                            }>
-                            <Text className='text-white text-xl font-medium text-center'>Third Party Certificate</Text>
-                        </TouchableOpacity>
+                        {asset?.third_party_certificate.length !== 0 && (
+                            <TouchableOpacity
+                                className='bg-[#263f94] rounded-xl py-3 px-4 items-center w-full'
+                                onPress={() =>
+                                    downloadFile(
+                                        ("https://api.tagxl.com/" +
+                                            asset?.third_party_certificate[0]?.third_party_certificate) as string
+                                    )
+                                }>
+                                <Text className='text-white text-xl font-medium text-center'>
+                                    Third Party Certificate
+                                </Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                     <View className='items-center w-full'>
                         <TouchableOpacity

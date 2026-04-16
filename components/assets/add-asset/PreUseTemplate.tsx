@@ -162,11 +162,11 @@ const PreUseTemplate = ({ formData, updateForm, error, onDragStateChange }: Prop
         <View className='flex-col gap-3 p-3 border border-gray-400 rounded-xl bg-white'>
             <Text className='text-[16px] font-semibold'>Pre Use Check Template</Text>
 
-            <Dropdown
+            <NativeDropdown
                 onChange={(text: string | number) => handleSelection(text)}
-                options={preUseTempList}
-                labelKey='title'
-                valueKey='id'
+                data={preUseTempList}
+                labelField='title'
+                valueField='id'
                 value={formData.pre_use_template_id}
                 placeholder='Select Pre Use Check Template'
             />

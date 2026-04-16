@@ -162,11 +162,11 @@ const MaintenanceTemplate = ({ formData, updateForm, error, onDragStateChange }:
         <View className='flex-col justify-between gap-3 p-3 border border-gray-400 rounded-xl bg-white'>
             <Text className='text-[16px] font-semibold'>Maintenance Check Template</Text>
 
-            <Dropdown
+            <NativeDropdown
                 onChange={(text: string | number) => handleSelection(text)}
-                options={preUseTempList}
-                labelKey='title'
-                valueKey='id'
+                data={preUseTempList}
+                labelField='title'
+                valueField='id'
                 value={formData.maintenance_template_id}
                 placeholder='Select Maintenance Check Template'
             />

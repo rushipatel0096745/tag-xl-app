@@ -85,3 +85,18 @@ export interface Question {
     type: string;
     multiselect_value?: Record<string, string>;
 }
+
+export interface AssetAccessLog {
+    id: number;
+    asset_id: number;
+    log_type: string;
+    pre_use_answers_id: number;
+    maintenance_answers_id: any;
+    submitted_by: {
+        id: number;
+        firstname: string;
+        lastname: string;
+        email: string;
+    };
+    created_at: string;
+}

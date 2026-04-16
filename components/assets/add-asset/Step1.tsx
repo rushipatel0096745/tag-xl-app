@@ -1,7 +1,7 @@
 import { CheckTagAssigned } from "@/services/asset";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Keyboard, Pressable, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
 import NewTagModal from "./NewTagModal";
 
 type TagType = "RFID" | "QR" | "Manual" | "";
@@ -83,92 +83,94 @@ const Step1 = ({ next, updateForm, validate, errors, formData }: Props) => {
     }
 
     return (
-        <View className='flex-1 p-3'>
-            <NewTagModal
-                visible={isModalOpen}
-                onRequestClose={closeModal}
-                onClose={closeModal}
-                formData={formData}
-                updateForm={updateForm}
-                next={next}
-            />
-
-            {/* Title */}
-            <Text className='text-xl font-semibold mb-4'>Step 1 - Select the Tag</Text>
-
-            {/* Tag Type */}
-            <View className='mb-4'>
-                <Text className='text-[16px] font-semibold mb-2'>Select UID Type</Text>
-
-                <View className='flex-row'>
-                    {tagTypeOptions.map((option) => {
-                        const isSelected = formData.tag_type === option.value;
-                        return (
-                            <Pressable
-                                key={option.value}
-                                onPress={() => {
-                                    updateForm("tag_type", option.value);
-                                    if (option.value === "QR") openQRScanner();
-                                    if(option.value === "RFID") openRFIDScanner();
-                                }}
-                                style={{
-                                    height: 38,
-                                    paddingHorizontal: 12,
-                                    borderRadius: 999,
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    borderWidth: 1,
-                                    marginRight: 8,
-                                    backgroundColor: isSelected ? "#263f94" : "#f5f6fa",
-                                    borderColor: isSelected ? "#263f94" : "#c9d5ff",
-                                }}>
-                                <Text
-                                    style={{
-                                        fontSize: 14,
-                                        fontWeight: "500",
-                                        color: isSelected ? "#ffffff" : "#111c43",
-                                    }}>
-                                    {option.label}
-                                </Text>
-                            </Pressable>
-                        );
-                    })}
-                </View>
-
-                {errors.tag_type && <Text className='text-red-500 mt-1'>{errors.tag_type}</Text>}
-            </View>
-
-            {/* UID Input */}
-            <View className='mb-4'>
-                <Text className='text-[16px] font-semibold mb-2'>Enter UID</Text>
-
-                <TextInput
-                    className='border border-gray-200 rounded-xl p-4 bg-gray-50 text-gray-800'
-                    placeholder='Unique ID'
-                    value={formData?.uid}
-                    onChangeText={handleUidChange}
-                    placeholderTextColor='#9CA3AF'
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View className='flex-1 p-3'>
+                <NewTagModal
+                    visible={isModalOpen}
+                    onRequestClose={closeModal}
+                    onClose={closeModal}
+                    formData={formData}
+                    updateForm={updateForm}
+                    next={next}
                 />
 
-                {errors.uid && <Text className='text-red-500 mt-1'>{errors.uid}</Text>}
-            </View>
+                {/* Title */}
+                <Text className='text-xl font-semibold mb-4'>Step 1 - Select the Tag</Text>
 
-            {/* Error Message */}
-            {assignError && (
-                <View className='bg-yellow-400 p-2 rounded-md mb-3'>
-                    <Text className='text-amber-900 text-[14px]'>{assignError}</Text>
+                {/* Tag Type */}
+                <View className='mb-4'>
+                    <Text className='text-[16px] font-semibold mb-2'>Select UID Type</Text>
+
+                    <View className='flex-row'>
+                        {tagTypeOptions.map((option) => {
+                            const isSelected = formData.tag_type === option.value;
+                            return (
+                                <Pressable
+                                    key={option.value}
+                                    onPress={() => {
+                                        updateForm("tag_type", option.value);
+                                        if (option.value === "QR") openQRScanner();
+                                        if (option.value === "RFID") openRFIDScanner();
+                                    }}
+                                    style={{
+                                        height: 38,
+                                        paddingHorizontal: 12,
+                                        borderRadius: 999,
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        borderWidth: 1,
+                                        marginRight: 8,
+                                        backgroundColor: isSelected ? "#263f94" : "#f5f6fa",
+                                        borderColor: isSelected ? "#263f94" : "#c9d5ff",
+                                    }}>
+                                    <Text
+                                        style={{
+                                            fontSize: 14,
+                                            fontWeight: "500",
+                                            color: isSelected ? "#ffffff" : "#111c43",
+                                        }}>
+                                        {option.label}
+                                    </Text>
+                                </Pressable>
+                            );
+                        })}
+                    </View>
+
+                    {errors.tag_type && <Text className='text-red-500 mt-1'>{errors.tag_type}</Text>}
                 </View>
-            )}
 
-            {/* Button */}
-            <View>
-                <TouchableOpacity
-                    className='bg-[#263f94] rounded-xl py-3 px-4 items-center self-end'
-                    onPress={handleSave}>
-                    <Text className='text-white text-[14px] font-medium'>Continue</Text>
-                </TouchableOpacity>
+                {/* UID Input */}
+                <View className='mb-4'>
+                    <Text className='text-[16px] font-semibold mb-2'>Enter UID</Text>
+
+                    <TextInput
+                        className='border border-gray-200 rounded-xl p-4 bg-gray-50 text-gray-800'
+                        placeholder='Unique ID'
+                        value={formData?.uid}
+                        onChangeText={handleUidChange}
+                        placeholderTextColor='#9CA3AF'
+                    />
+
+                    {errors.uid && <Text className='text-red-500 mt-1'>{errors.uid}</Text>}
+                </View>
+
+                {/* Error Message */}
+                {assignError && (
+                    <View className='bg-yellow-400 p-2 rounded-md mb-3'>
+                        <Text className='text-amber-900 text-[14px]'>{assignError}</Text>
+                    </View>
+                )}
+
+                {/* Button */}
+                <View>
+                    <TouchableOpacity
+                        className='bg-[#263f94] rounded-xl py-3 px-4 items-center self-end'
+                        onPress={handleSave}>
+                        <Text className='text-white text-[14px] font-medium'>Continue</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-        </View>
+        </TouchableWithoutFeedback>
     );
 };
 

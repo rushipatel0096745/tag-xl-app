@@ -1,4 +1,5 @@
 import SearchAsset from "@/components/search/SearchAsset";
+import { Ionicons } from "@expo/vector-icons";
 import { BottomTabBar } from "@react-navigation/bottom-tabs";
 import { Tabs, useGlobalSearchParams, useRouter } from "expo-router";
 import { Home, Search, User } from "lucide-react-native";
@@ -16,7 +17,7 @@ export default function TabsLayout() {
 
     const insets = useSafeAreaInsets();
     const TAB_BAR_HEIGHT = 60 + insets.bottom;
-    const SHEET_HEIGHT = SCREEN_HEIGHT * 0.55;
+    const SHEET_HEIGHT = SCREEN_HEIGHT * 0.6;
 
     const slideAnim = useRef(new Animated.Value(SHEET_HEIGHT)).current;
     const [isOpen, setIsOpen] = useState(false);
@@ -25,7 +26,7 @@ export default function TabsLayout() {
     const [sheetConfig, setSheetConfig] = useState({
         initialTab: "manual" as TabType,
         allowedTabs: ["nfc", "scan", "manual"] as TabType[],
-        sheetMode: "DEFAULT" as "ADD_ASSET" | "EDIT_ASSET" | "DEFAULT"
+        sheetMode: "DEFAULT" as "ADD_ASSET" | "EDIT_ASSET" | "DEFAULT",
     });
 
     useEffect(() => {
@@ -33,7 +34,7 @@ export default function TabsLayout() {
             openSheet({
                 initialTab: params.sheetOpen as "nfc" | "scan" | "manual",
                 allowedTabs: [params.sheetAllowed as any],
-                sheetMode: params.sheetMode as "ADD_ASSET" | "EDIT_ASSET" | "DEFAULT" || "DEFAULT",
+                sheetMode: (params.sheetMode as "ADD_ASSET" | "EDIT_ASSET" | "DEFAULT") || "DEFAULT",
             });
 
             router.setParams({
@@ -59,7 +60,11 @@ export default function TabsLayout() {
     //     }).start();
     // };
 
-    const openSheet = (config?: { initialTab?: TabType; allowedTabs?: TabType[], sheetMode?: "ADD_ASSET" | "EDIT_ASSET" | "DEFAULT" }) => {
+    const openSheet = (config?: {
+        initialTab?: TabType;
+        allowedTabs?: TabType[];
+        sheetMode?: "ADD_ASSET" | "EDIT_ASSET" | "DEFAULT";
+    }) => {
         if (isOpen) {
             closeSheet();
             return;
@@ -69,7 +74,7 @@ export default function TabsLayout() {
             setSheetConfig({
                 initialTab: config.initialTab ?? "manual",
                 allowedTabs: config.allowedTabs ?? ["nfc", "scan", "manual"],
-                sheetMode: config.sheetMode ?? "DEFAULT"
+                sheetMode: config.sheetMode ?? "DEFAULT",
             });
         }
 
@@ -186,7 +191,7 @@ export default function TabsLayout() {
                     name='search-asset/index'
                     options={{
                         title: "Search",
-                        tabBarIcon: ({ color }) => <Search color={isOpen ? "#263f94" : color} />,
+                        tabBarIcon: ({ color }) => <Ionicons name="wifi" size={24} color={"#263f94"} />,
                         tabBarButton: (props) => (
                             <TouchableOpacity {...(props as any)} onPress={openSheet} style={props.style} />
                         ),
@@ -214,3 +219,38 @@ export default function TabsLayout() {
         </View>
     );
 }
+
+//  <Tabs.Screen
+//                 name='search-asset/index'
+//                 options={{
+//                     title: "Search",
+//                     tabBarIcon: ({ color }) => <Search color={isOpen ? "#263f94" : color} />,
+
+//                     tabBarButton: (props) => (
+//                         <TouchableOpacity
+//                             {...(props as any)}
+//                             onPress={openSheet}
+//                             style={{
+//                                 justifyContent: "center",
+//                                 alignItems: "center",
+//                             }}>
+//                             <View
+//                                 style={{
+//                                     width: 65,
+//                                     height: 65,
+//                                     borderRadius: 25,
+//                                     backgroundColor: "#263f94",
+//                                     justifyContent: "center",
+//                                     alignItems: "center",
+//                                     shadowColor: "#000",
+//                                     shadowOffset: { width: 0, height: 3 },
+//                                     shadowOpacity: 0.3,
+//                                     shadowRadius: 4,
+//                                 }}>
+//                                 {/* <Wifi color='white' size={26} /> */}
+//                                 <Ionicons name='wifi' size={26} color='white' />
+//                             </View>
+//                         </TouchableOpacity>
+//                     ),
+//                 }}
+//             />

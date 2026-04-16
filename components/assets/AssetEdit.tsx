@@ -129,7 +129,8 @@ const AssetEdit = ({ id }: Props) => {
             assetData.append("status", String(formData.status));
             assetData.append("maintenance_template_id", formData.maintenance_template_id);
             assetData.append("pre_use_template_id", formData.pre_use_template_id);
-            formData.manual_template_id && assetData.append("manual_template_id", formData.manual_template_id);
+            formData.manual_template_id !== "undefined" &&
+                assetData.append("manual_template_id", formData.manual_template_id);
 
             if (third_party_file) {
                 assetData.append("third_party_certificate", third_party_file as any);
@@ -143,7 +144,7 @@ const AssetEdit = ({ id }: Props) => {
             }
 
             console.log("\n===== FORM DATA TO BE SENT =====");
-            console.log(formData);
+            console.log(JSON.stringify(assetData, null, 2));
             console.log("========================\n");
 
             const result = await UpdateAsset(Number(id), assetData);
@@ -746,6 +747,7 @@ const AssetEdit = ({ id }: Props) => {
                 </View>
             </View>
 
+            {/* third party certificate */}
             <View className='flex-col gap-2'>
                 <Text className='text-[16px]'>Third Party Certificate</Text>
                 <View className='flex flex-col justify-between border rounded-xl border-gray-400  bg-white'>

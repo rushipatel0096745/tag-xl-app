@@ -1,12 +1,11 @@
 import { CreateAsset } from "@/services/asset";
 import { router, useFocusEffect, useNavigation } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
-import { Alert, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useState } from "react";
+import { Alert, View } from "react-native";
 import Step1 from "./Step1";
 import Step2 from "./Step2";
 import Step3 from "./Step3";
 import Step4 from "./Step4";
-import { ChevronLeft } from "lucide-react-native";
 
 const AddAsset = () => {
     const navigation = useNavigation();
@@ -59,10 +58,21 @@ const AddAsset = () => {
     const [formError, setFormError] = useState("");
 
     const ALLOWED_IMAGE_TYPES = ["image/png", "image/jpg", "image/jpeg"];
+    const ALLOWED_THIRD_PARTY_TYPES = ["image/png", "image/jpg", "image/jpeg", "application/pdf"];
     const MAX_FILE_SIZE_MB = 5;
 
     const updateForm = function (name: string, value: any) {
         if ((name === "oem_certificate" || name === "third_party_certificate") && value) {
+            if (!ALLOWED_THIRD_PARTY_TYPES.includes(value.type)) {
+                setErrors((prev: any) => ({
+                    ...prev,
+                    [name]: "Only PNG, JPG, or JPEG images and PDFs are allowed",
+                }));
+                return;
+            }
+        }
+
+        if (name === "image" && value) {
             if (!ALLOWED_IMAGE_TYPES.includes(value.type)) {
                 setErrors((prev: any) => ({
                     ...prev,
@@ -70,13 +80,6 @@ const AddAsset = () => {
                 }));
                 return;
             }
-            // if (value.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
-            //     setErrors((prev: any) => ({
-            //         ...prev,
-            //         [name]: `Upload File Less than ${MAX_FILE_SIZE_MB}MB`,
-            //     }));
-            //     return;
-            // }
         }
 
         setFormData((prev) => ({
@@ -114,14 +117,14 @@ const AddAsset = () => {
             if (!formData.oem_certificate) {
                 newErrors.oem_certificate = "OEM Certificate is required";
             } else {
-                if (!ALLOWED_IMAGE_TYPES.includes(formData.oem_certificate.type)) {
-                    newErrors.oem_certificate = "Only PNG, JPG, or JPEG images are allowed";
+                if (!ALLOWED_THIRD_PARTY_TYPES.includes(formData.oem_certificate.type)) {
+                    newErrors.oem_certificate = "Only PNG, JPG, or JPEG images and PDFs are allowed";
                 }
             }
 
             if (formData.third_party_certificate) {
-                if (!ALLOWED_IMAGE_TYPES.includes(formData.third_party_certificate.type)) {
-                    newErrors.third_party_certificate = "Only PNG, JPG, or JPEG images are allowed";
+                if (!ALLOWED_THIRD_PARTY_TYPES.includes(formData.third_party_certificate.type)) {
+                    newErrors.third_party_certificate = "Only PNG, JPG, or JPEG images and PDFs are allowed";
                 }
 
                 if (!formData.third_party_start_date) {
@@ -231,7 +234,7 @@ const AddAsset = () => {
                     errors={errors}
                     formData={formData}
                 />
-            )}  
+            )}
             {currentStep === 3 && (
                 <Step3
                     prev={prevStep}

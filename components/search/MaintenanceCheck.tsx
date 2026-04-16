@@ -1,18 +1,19 @@
 import { useAuth } from "@/context/AuthContext";
 import { validateFileSize } from "@/lib/utils";
-import { GetAsset } from "@/services/asset";
+import { GetAsset, MaintenanceAnswers } from "@/services/asset";
 import { AssetDetail, Question } from "@/types/Aseet";
 import { Ionicons } from "@expo/vector-icons";
 import { Camera } from "expo-camera";
 import * as DocumentPicker from "expo-document-picker";
-import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { CameraIcon, FileText, FolderOpen, ImageIcon, Upload, X } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
     ActionSheetIOS,
+    ActivityIndicator,
     Alert,
+    Image,
     Modal,
     Platform,
     Pressable,
@@ -44,6 +45,7 @@ const MaintenanceCheck = () => {
     const [asset, setAsset] = useState<AssetDetail | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [loading, setLoading] = useState(false);
     const [answers, setAnswers] = useState<Answer[]>([]);
 
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -253,67 +255,73 @@ const MaintenanceCheck = () => {
     }
 
     async function handleSubmit() {
-        if (!uploadedFile) {
-            Alert.alert("Photo", "Photo is required");
-            return;
+        setLoading(true);
+
+        try {
+            if (!uploadedFile) {
+                Alert.alert("Photo", "Photo is required");
+                return;
+            }
+
+            const answerData = answers.map((a) => {
+                const question = questions.find((q) => q.id === a.questionId);
+                return {
+                    question: question?.question,
+                    answer: a.answer,
+                };
+            });
+
+            const fitForUse = answerData.find((item) => item.question === "Fit for use?");
+            const remarks = answerData.find((item) => item.question === "Remarks?");
+
+            const otherAnswers = answerData.filter(
+                (item) => item.question !== "Fit for use?" && item.question !== "Remarks?"
+            );
+
+            const formData = new FormData();
+            formData.append("asset_id", String(asset?.id));
+            formData.append("maintenance_template_id", String(asset?.maintenance_template?.id));
+            formData.append("user_id", String(user?.id));
+            formData.append("answers", JSON.stringify(otherAnswers));
+            formData.append("fit_for_use", fitForUse?.answer as string);
+            formData.append("remarks", remarks?.answer as string);
+            if (uploadedFile) {
+                formData.append("image", {
+                    uri: uploadedFile.uri,
+                    name: uploadedFile.name,
+                    type: uploadedFile.mimeType ?? "application/octet-stream",
+                } as any);
+            }
+
+            // console.log("submitted answers: ", JSON.stringify([...formData.entries()], null, 3));
+
+            const result = await MaintenanceAnswers(formData);
+
+            if (result.has_error && result.error_code === "PERMISSION_DENIED") {
+                Alert.alert("Permission Denied", result.message);
+            }
+
+            if (result.has_error) {
+                Alert.alert("Error", result.message);
+            }
+
+            if (!result.has_error) {
+                Alert.alert("Maintenance", "Maintenance check submitted successfully", [
+                    {
+                        text: "OK",
+                        onPress: () => {
+                            router.replace({
+                                pathname: "/(app)/(tabs)/search-asset/asset-detail",
+                                params: { uid: asset?.tag?.uid },
+                            });
+                        },
+                    },
+                ]);
+            }
+        } catch (error) {
+        } finally {
+            setLoading(false);
         }
-
-        const answerData = answers.map((a) => {
-            const question = questions.find((q) => q.id === a.questionId);
-            return {
-                question: question?.question,
-                answer: a.answer,
-            };
-        });
-
-        const fitForUse = answerData.find((item) => item.question === "Fit for use?");
-        const remarks = answerData.find((item) => item.question === "Remarks?");
-
-        const otherAnswers = answerData.filter(
-            (item) => item.question !== "Fit for use?" && item.question !== "Remarks?"
-        );
-
-        const formData = new FormData();
-        formData.append("asset_id", String(asset?.id));
-        formData.append("pre_use_template_id", String(asset?.pre_use_template?.id));
-        formData.append("user_id", String(user?.id));
-        formData.append("answers", JSON.stringify(otherAnswers));
-        formData.append("fit_for_use", fitForUse?.answer as string);
-        formData.append("remarks", remarks?.answer as string);
-        if (uploadedFile) {
-            formData.append("image", {
-                uri: uploadedFile.uri,
-                name: uploadedFile.name,
-                type: uploadedFile.mimeType ?? "application/octet-stream",
-            } as any);
-        }
-
-        console.log("submitted answers: ", JSON.stringify([...formData.entries()], null, 3));
-
-        Alert.alert("Pre Use Check", "Pre-use check submitted successfully", [
-            {
-                text: "OK",
-                onPress: () =>
-                    router.replace({
-                        pathname: "/(app)/(tabs)/search-asset/asset-detail",
-                        params: { uid: asset?.tag?.uid },
-                    }),
-            },
-        ]);
-
-        // const result = await MaintenanceAnswers(formData);
-
-        // if (result.has_error && result.error_code === "PERMISSION_DENIED") {
-        //     Alert.alert("Permission Denied", result.message);
-        // }
-
-        // if (result.has_error) {
-        //     Alert.alert("Error", result.message);
-        // }
-
-        // if (!result.has_error) {
-        //     Alert.alert("Success", "Pre-use check submitted successfully");
-        // }
     }
 
     return (
@@ -423,11 +431,11 @@ const MaintenanceCheck = () => {
                                 {uploadedFile && (
                                     <View className='flex-row flex-wrap gap-2 mb-2'>
                                         <View className='relative'>
-                                            {uploadedFile.uri ? (
+                                            {uploadedFile.type === "image" ? (
                                                 <Image
                                                     source={{ uri: uploadedFile.uri }}
                                                     className='w-20 h-20 rounded-xl bg-gray-100'
-                                                    contentFit='cover'
+                                                    resizeMode='cover'
                                                 />
                                             ) : (
                                                 <View className='w-20 h-20 rounded-xl bg-blue-50 border border-blue-100 items-center justify-center gap-1'>
@@ -476,11 +484,11 @@ const MaintenanceCheck = () => {
                                 {uploadedFile && (
                                     <View className='flex-row flex-wrap gap-2 mb-2'>
                                         <View className='relative'>
-                                            {uploadedFile.uri ? (
+                                            {uploadedFile.type === "image" ? (
                                                 <Image
                                                     source={{ uri: uploadedFile.uri }}
                                                     className='w-20 h-20 rounded-xl bg-gray-100'
-                                                    contentFit='cover'
+                                                    resizeMode='cover'
                                                 />
                                             ) : (
                                                 <View className='w-20 h-20 rounded-xl bg-blue-50 border border-blue-100 items-center justify-center gap-1'>
@@ -567,6 +575,7 @@ const MaintenanceCheck = () => {
                     className={`flex-1 flex-row justify-center items-center py-3 rounded-xl ${canGoNext ? "bg-[#263f94]" : "bg-gray-300"}`}>
                     <Text className='text-white text-sm font-medium'>
                         {currentIndex === questions.length - 1 ? "Submit" : "Next"}
+                        {loading && <ActivityIndicator color="#fff" />}
                     </Text>
                 </TouchableOpacity>
             </View>

@@ -1,6 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
-import { GetAsset } from "@/services/asset";
-import { AssetDetail, Question } from "@/types/Aseet";
+import { AssetInspectionLog, GetAsset } from "@/services/asset";
+import { AssetAccessLog, AssetDetail, Question } from "@/types/Aseet";
 import { Image } from "expo-image";
 import React, { useEffect, useState } from "react";
 import { Alert, Linking, ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -9,6 +9,7 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import * as FileSystem from "expo-file-system/legacy";
 import { router } from "expo-router";
 import { LayoutAnimation, Platform, UIManager } from "react-native";
+import { FlatList } from "react-native-gesture-handler";
 const { StorageAccessFramework } = FileSystem;
 
 // Enable for Android
@@ -28,8 +29,13 @@ const AssetDetails = ({ id }: { id: string }) => {
     const [loading, setLoading] = useState(true);
     const [preUseCollapsed, setPreUseCollapsed] = useState(true);
     const [maintenanceCollapsed, setMaintenanceCollapsed] = useState(true);
+    const [accessLogCollapsed, setAccessLogCollapsed] = useState(true);
     const [locations, setLocations] = useState();
     const { user } = useAuth();
+    const [accessLogs, setAccessLogs] = useState<AssetAccessLog[]>([]);
+    const [page, setPage] = useState(1);
+    const [log_loading, setLogLoading] = useState(false);
+    const [hasAccessLogMore, setHasAccessLogMore] = useState(true);
 
     async function fetchAsset() {
         try {
@@ -52,63 +58,41 @@ const AssetDetails = ({ id }: { id: string }) => {
         }
     }
 
-    // async function downloadFile(url: string, folderName: string = "downloads"): Promise<string> {
-    //     try {
-    //         const destination = new Directory(Paths.document, folderName);
+    async function getAccessLogs(pageNumber = 1) {
+        if (log_loading) return;
 
-    //         if (!destination.exists) {
-    //             destination.create();
-    //         }
+        setLogLoading(true);
 
-    //         const fileName = url.split("/").pop() || `file_${Date.now()}`;
-    //         const file = new File(destination, fileName);
+        const result = await AssetInspectionLog(parseInt(id as string), pageNumber, 5);
 
-    //         const output = await File.downloadFileAsync(url, file, {
-    //             idempotent: true,
-    //         });
+        if (result.has_error) {
+            Alert.alert("Error", result.message);
+            setLogLoading(false);
+            return;
+        }
 
-    //         console.log("Downloaded to:", output.uri);
-    //         Alert.alert("File", "File downloaded");
+        const newLogs = result.logs || [];
 
-    //         return output.uri;
-    //     } catch (error) {
-    //         console.error("Download error:", error);
-    //         throw error;
-    //     }
-    // }
+        if (pageNumber === 1) {
+            setAccessLogs(newLogs);
+        } else {
+            setAccessLogs((prev) => [...prev, ...newLogs]);
+        }
 
-    // async function downloadFile(url: string) {
-    //     try {
-    //         const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+        if (newLogs.length < 5) {
+            setHasAccessLogMore(false);
+        }
 
-    //         if (!permissions.granted) {
-    //             alert("Permission denied");
-    //             return;
-    //         }
+        setLogLoading(false);
+    }
 
-    //         const directoryUri = permissions.directoryUri;
+    const handleAccessLogLoadMore = () => {
+        if (!hasAccessLogMore || log_loading) return;
 
-    //         const fileName = url.split("/").pop() || `file_${Date.now()}`;
-
-    //         const tempFile = FileSystem.documentDirectory + fileName;
-
-    //         const downloaded = await FileSystem.downloadAsync(url, tempFile);
-
-    //         const fileBase64 = await FileSystem.readAsStringAsync(downloaded.uri, {
-    //             encoding: FileSystem.EncodingType.Base64,
-    //         });
-
-    //         const newFileUri = await StorageAccessFramework.createFileAsync(directoryUri, fileName, "image/jpeg");
-
-    //         await FileSystem.writeAsStringAsync(newFileUri, fileBase64, {
-    //             encoding: FileSystem.EncodingType.Base64,
-    //         });
-
-    //         alert("Saved to Downloads");
-    //     } catch (error) {
-    //         console.error(error);
-    //     }
-    // }
+        const nextPage = page + 1;
+        setPage(nextPage);
+        getAccessLogs(nextPage);
+    };
 
     const downloadFile = (url: string) => {
         Alert.alert("Download File", "Browser is required to open this document", [
@@ -131,6 +115,7 @@ const AssetDetails = ({ id }: { id: string }) => {
 
     useEffect(() => {
         fetchAsset();
+        getAccessLogs(1);
         setUserRole(user?.role.permission.asset ?? []);
     }, []);
 
@@ -331,6 +316,51 @@ const AssetDetails = ({ id }: { id: string }) => {
                                 </View>
                             )}
                         </View>
+
+                        {/* access log */}
+                        <View className='flex flex-col justify-between border rounded-xl border-gray-400'>
+                            <View className='flex flex-row justify-between items-center py-2 px-4 '>
+                                <View>
+                                    <Text className='font-semibold text-[16px]'>Access Log</Text>
+                                </View>
+                                <TouchableOpacity
+                                    className='bg-[#263f94] rounded-xl px-3 py-2 active:opacity-80'
+                                    onPress={() => toggle(setAccessLogCollapsed)}>
+                                    <Text className='text-white text-center font-semibold text-sm'>
+                                        {accessLogCollapsed ? "Expand" : "Collapse"}
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            {!accessLogCollapsed && (
+                                <FlatList
+                                    data={accessLogs}
+                                    keyExtractor={(item) => item.id.toString()}
+                                    scrollEnabled={false}
+                                    nestedScrollEnabled={true}
+                                    renderItem={({ item }) => (
+                                        <View style={{ padding: 12, borderBottomWidth: 1 }}>
+                                            <Text>{item.log_type}</Text>
+                                            <Text>
+                                                {item.submitted_by.firstname} {item.submitted_by.lastname}
+                                            </Text>
+                                            <Text>{item.created_at}</Text>
+                                        </View>
+                                    )}
+                                    ListFooterComponent={
+                                        hasAccessLogMore ? (
+                                            <TouchableOpacity onPress={handleAccessLogLoadMore} style={{ padding: 16 }}>
+                                                <Text style={{ textAlign: "center" }}>
+                                                    {loading ? "Loading..." : "Load More"}
+                                                </Text>
+                                            </TouchableOpacity>
+                                        ) : (
+                                            <Text style={{ textAlign: "center", padding: 16 }}>No more logs</Text>
+                                        )
+                                    }
+                                />
+                            )}
+                        </View>
                     </View>
                 </ScrollView>
             </SafeAreaView>
@@ -339,3 +369,61 @@ const AssetDetails = ({ id }: { id: string }) => {
 };
 
 export default AssetDetails;
+
+// async function downloadFile(url: string, folderName: string = "downloads"): Promise<string> {
+//     try {
+//         const destination = new Directory(Paths.document, folderName);
+
+//         if (!destination.exists) {
+//             destination.create();
+//         }
+
+//         const fileName = url.split("/").pop() || `file_${Date.now()}`;
+//         const file = new File(destination, fileName);
+
+//         const output = await File.downloadFileAsync(url, file, {
+//             idempotent: true,
+//         });
+
+//         console.log("Downloaded to:", output.uri);
+//         Alert.alert("File", "File downloaded");
+
+//         return output.uri;
+//     } catch (error) {
+//         console.error("Download error:", error);
+//         throw error;
+//     }
+// }
+
+// async function downloadFile(url: string) {
+//     try {
+//         const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+
+//         if (!permissions.granted) {
+//             alert("Permission denied");
+//             return;
+//         }
+
+//         const directoryUri = permissions.directoryUri;
+
+//         const fileName = url.split("/").pop() || `file_${Date.now()}`;
+
+//         const tempFile = FileSystem.documentDirectory + fileName;
+
+//         const downloaded = await FileSystem.downloadAsync(url, tempFile);
+
+//         const fileBase64 = await FileSystem.readAsStringAsync(downloaded.uri, {
+//             encoding: FileSystem.EncodingType.Base64,
+//         });
+
+//         const newFileUri = await StorageAccessFramework.createFileAsync(directoryUri, fileName, "image/jpeg");
+
+//         await FileSystem.writeAsStringAsync(newFileUri, fileBase64, {
+//             encoding: FileSystem.EncodingType.Base64,
+//         });
+
+//         alert("Saved to Downloads");
+//     } catch (error) {
+//         console.error(error);
+//     }
+// }

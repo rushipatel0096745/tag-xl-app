@@ -205,3 +205,19 @@ export const MaintenanceAnswers = async function (formData: FormData) {
 
     return result;
 };
+
+export const AssetInspectionLog = async function (asset_id: number, page: number = 1, page_size: number = 10) {
+    const result = await clientFetch("/company/asset/inspection-logs", {
+        method: "POST",
+        headers: {
+            ...(await getAuthHeaders()),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            asset_id: asset_id,
+            page: page,
+            page_size: page_size,
+        }),
+    });
+    return result;
+};

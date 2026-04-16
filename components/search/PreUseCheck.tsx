@@ -1,6 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { validateFileSize } from "@/lib/utils";
-import { GetAsset } from "@/services/asset";
+import { GetAsset, PreUseAnswers } from "@/services/asset";
 import { AssetDetail, Question } from "@/types/Aseet";
 import { Ionicons } from "@expo/vector-icons";
 import { Camera } from "expo-camera";
@@ -8,7 +8,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
-import { CameraIcon, FileText, ImageIcon, Upload, X } from "lucide-react-native";
+import { CameraIcon, FileText, FolderOpen, ImageIcon, Upload, X } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import {
     ActionSheetIOS,
@@ -40,7 +40,7 @@ const PreUseCheck = () => {
     const { asset_id } = useLocalSearchParams();
 
     const { user } = useAuth();
-    
+
     const [asset, setAsset] = useState<AssetDetail | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -282,32 +282,31 @@ const PreUseCheck = () => {
             } as any);
         }
 
-        console.log("submitted answers: ", JSON.stringify([...formData.entries()], null, 3));
+        // console.log("submitted answers: ", JSON.stringify([...formData.entries()], null, 3));
 
-        Alert.alert("Pre Use Check", "Pre-use check submitted successfully", [
-            {
-                text: "OK",
-                onPress: () =>
-                    router.replace({
-                        pathname: "/(app)/(tabs)/search-asset/asset-detail",
-                        params: { uid: asset?.tag?.uid },
-                    }),
-            },
-        ]);
+        const result = await PreUseAnswers(formData);
 
-        // const result = await PreUseAnswers(formData);
+        if (result.has_error && result.error_code === "PERMISSION_DENIED") {
+            Alert.alert("Permission Denied", result.message);
+        }
 
-        // if (result.has_error && result.error_code === "PERMISSION_DENIED") {
-        //     Alert.alert("Permission Denied", result.message);
-        // }
+        if (result.has_error) {
+            Alert.alert("Error", result.message);
+        }
 
-        // if (result.has_error) {
-        //     Alert.alert("Error", result.message);
-        // }
-
-        // if (!result.has_error) {
-        //     Alert.alert("Success", "Pre-use check submitted successfully");
-        // }
+        if (!result.has_error) {
+            Alert.alert("Pre Use Check", "Pre-use check submitted successfully", [
+                {
+                    text: "OK",
+                    onPress: () => {
+                        router.push({
+                            pathname: "/(app)/(tabs)/search-asset/asset-detail",
+                            params: { uid: asset?.tag?.uid },
+                        });
+                    },
+                },
+            ]);
+        }
     }
 
     return (
@@ -348,7 +347,7 @@ const PreUseCheck = () => {
                             </View>
                         </TouchableOpacity>
 
-                        {/* <TouchableOpacity
+                        <TouchableOpacity
                             onPress={handleChooseFile}
                             className='flex-row items-center gap-4 p-4 bg-gray-50 rounded-2xl active:opacity-70'>
                             <View className='w-10 h-10 bg-[#263f94]/10 rounded-xl items-center justify-center'>
@@ -358,7 +357,7 @@ const PreUseCheck = () => {
                                 <Text className='font-semibold text-gray-800'>Choose a File</Text>
                                 <Text className='text-gray-400 text-xs mt-0.5'>Browse PDFs, docs & more</Text>
                             </View>
-                        </TouchableOpacity> */}
+                        </TouchableOpacity>
 
                         <TouchableOpacity
                             onPress={() => setIsUploadModalOpen(false)}
@@ -470,7 +469,7 @@ const PreUseCheck = () => {
                                 {uploadedFile && (
                                     <View className='flex-row flex-wrap gap-2 mb-2'>
                                         <View className='relative'>
-                                            {uploadedFile.uri ? (
+                                            {uploadedFile.type === "image" ? (
                                                 <Image
                                                     source={{ uri: uploadedFile.uri }}
                                                     className='w-20 h-20 rounded-xl bg-gray-100'

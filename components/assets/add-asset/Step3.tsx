@@ -2,6 +2,7 @@ import NativeDateTimePicker from "@/components/common/NativeDateTimePicker";
 import NativeDropdown from "@/components/common/NativeDropdown";
 import * as DocumentPicker from "expo-document-picker";
 // import { Image } from "expo-image";
+import FilePreviewModal from "@/components/common/FilePreviewModal";
 import NativeDatePickerInput, { formatDate as dateFormat } from "@/components/common/NativeDateTimePicker";
 import { validateFileSize } from "@/lib/utils";
 import * as ImagePicker from "expo-image-picker";
@@ -31,6 +32,8 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
     const [third_party_file, setThirdPartyFile] = useState<UploadedFile | null>(
         formData.third_party_certificate || null
     );
+    const [previewModalOpen, setPreviewModalOpen] = useState(false);
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     useEffect(() => {
         if (formData.oem_certificate && !OEMfile) {
@@ -143,6 +146,8 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
             updateForm("oem_certificate", null);
         } else {
             setThirdPartyFile(null);
+            setStartDate(null);
+            setExpiryDate(null);
             updateForm("third_party_certificate", null);
         }
     };
@@ -237,10 +242,10 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
         }
     };
 
-    // useEffect(() => {
-    //     console.log("third_part_file: ", third_party_file);
-    //     console.log("OEM file: ", OEMfile);
-    // }, [third_party_file, OEMfile]);
+    useEffect(() => {
+        console.log("third_part_file: ", third_party_file);
+        console.log("OEM file: ", OEMfile);
+    }, [third_party_file, OEMfile]);
 
     function handleDate(date_type: "start" | "expiry", val: Date) {
         if (date_type === "start") {
@@ -283,7 +288,7 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
         console.log("form data: ", JSON.stringify(formData, null, 2));
         next();
     }
-    
+
     const customDropdownOptions = [
         { label: "1 Months", value: "1" },
         { label: "3 Months", value: "3" },
@@ -357,20 +362,42 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
                     </Pressable>
                 </Modal>
 
+                {/* file preview modal */}
+                <FilePreviewModal
+                    visible={previewModalOpen}
+                    onClose={() => setPreviewModalOpen(false)}
+                    imageUri={previewImage ?? undefined}
+                    onRequestClose={() => setPreviewModalOpen(false)}
+                />
+
                 {/* Title */}
                 <Text className='text-xl font-semibold mb-4'>Step 3 - Certificates</Text>
 
                 <View className='gap-2'>
                     <Text className='text-[16px] font-semibold'>OEM Certificate</Text>
                     {OEMCertificateURI && (
-                        <View className='relative self-start'>
-                            <Image source={{ uri: OEMCertificateURI }} className='w-20 h-20 rounded-xl bg-gray-100' />
+                        <TouchableOpacity
+                            className='relative self-start'
+                            onPress={() => {
+                                setPreviewImage(OEMCertificateURI);
+                                setPreviewModalOpen(true);
+                            }}>
+                            {OEMCertificateURI.toLowerCase().endsWith(".pdf") ? (
+                                <View className='w-30 h-20 rounded-xl bg-gray-100 items-center justify-center'>
+                                    <Text className='text-gray-500 font-medium'>{OEMfile?.name}</Text>
+                                </View>
+                            ) : (
+                                <Image
+                                    source={{ uri: OEMCertificateURI }}
+                                    className='w-20 h-20 rounded-xl bg-gray-100'
+                                />
+                            )}
                             <TouchableOpacity
                                 onPress={() => removeFile("oem")}
                                 className='absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full items-center justify-center'>
                                 <X size={10} color='white' strokeWidth={3} />
                             </TouchableOpacity>
-                        </View>
+                        </TouchableOpacity>
                     )}
                     {/* upload file*/}
                     <TouchableOpacity
@@ -391,21 +418,31 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
                 <View className='gap-2'>
                     <Text className='text-[16px] font-semibold'>Third Party Certificate</Text>
                     {ThirdPartyCertificateURI && (
-                        <View className='relative self-start'>
-                            <Image
-                                source={{
-                                    uri: ThirdPartyCertificateURI,
-                                }}
-                                className='w-20 h-20 rounded-xl bg-gray-100'
-                                resizeMode='cover'
-                            />
-
+                        <TouchableOpacity
+                            className='relative self-start'
+                            onPress={() => {
+                                setPreviewImage(ThirdPartyCertificateURI);
+                                setPreviewModalOpen(true);
+                            }}>
+                            {ThirdPartyCertificateURI.toLowerCase().endsWith(".pdf") ? (
+                                <View className='w-20 h-20 rounded-xl bg-gray-100 items-center justify-center'>
+                                    <Text className='text-gray-500 font-medium'>{third_party_file?.name}</Text>
+                                </View>
+                            ) : (
+                                <Image
+                                    source={{
+                                        uri: ThirdPartyCertificateURI,
+                                    }}
+                                    className='w-20 h-20 rounded-xl bg-gray-100'
+                                    resizeMode='cover'
+                                />
+                            )}
                             <TouchableOpacity
                                 onPress={() => removeFile("third_party")}
                                 className='absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full items-center justify-center'>
                                 <X size={10} color='white' strokeWidth={3} />
                             </TouchableOpacity>
-                        </View>
+                        </TouchableOpacity>
                     )}
 
                     {/* upload file*/}
@@ -431,6 +468,9 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
                                 onChange={handleStartDateChange}
                                 maximumDate={new Date()}
                             />
+                            {errors.third_party_start_date && (
+                                <Text className='text-red-500 text-sm mt-1'>{errors.third_party_start_date}</Text>
+                            )}
 
                             <View className='gap-1'>
                                 <Text className='text-sm font-medium text-gray-700'>Select Frequency</Text>
