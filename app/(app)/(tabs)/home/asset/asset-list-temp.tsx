@@ -41,47 +41,49 @@ const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => (
             {item.status === 0 && (
                 <Text className='text-green-600 bg-green-100 px-3 py-1 rounded-full text-xs font-semibold'>GOOD</Text>
             )}
-
-            {item.status === 1 && (
-                <Text className='text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full text-xs font-semibold'>
-                    WARNING
-                </Text>
-            )}
-
-            {item.status === 2 && (
-                <Text className='text-red-600 bg-red-100 px-3 py-1 rounded-full text-xs font-semibold'>BAD</Text>
-            )}
         </View>
     </TouchableOpacity>
 );
 
-const AssetList = () => {
+const AssetListTemp = () => {
     const navigation = useNavigation();
 
     const [list, setList] = useState<AssetItem[]>([]);
     const [userRole, setUserRole] = useState<string[]>([]);
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const [loading, setLoading] = useState(true);
-    const [initialLoad, setInitialLoad] = useState(true);
-
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
-
+    const [errors, setErrors] = useState<Record<string, string>>({});
     const { user } = useAuth();
-    // const debouncedSearch = useDebounce(searchText, 500);
 
     const [refreshing, setRefreshing] = useState(false);
 
-    // useEffect(() => {
-    //     navigation.setOptions({
-    //         headerLeft: () => (
-    //             <TouchableOpacity onPress={() => router.back()}>
-    //                 <ChevronLeft size={24} color='#000' />
-    //             </TouchableOpacity>
-    //         ),
-    //     });
-    // }, [navigation]);
+    // async function fetchAssets() {
+    //     try {
+    //         setLoading(true);
+
+    //         const filter = {
+    //             field: "name",
+    //             condition: "contains",
+    //             text: searchText,
+    //         };
+
+    //         const result = await GetAssetList([filter], searchText !== "" ? 0 : 1);
+
+    //         if (result.has_error && result.error_code === "PERMISSION_DENIED") {
+    //             setErrors({ permission: result.message });
+    //         }
+
+    //         if (!result.has_error) {
+    //             setList(result?.assets);
+    //         }
+    //     } catch (err) {
+    //         console.error("Error fetching assets:", err);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // }
 
     const fetchAssets = async (pageNumber = 1, isLoadMore = false) => {
         try {
@@ -105,16 +107,7 @@ const AssetList = () => {
             console.log(err);
         } finally {
             setLoading(false);
-            setInitialLoad(false);
         }
-    };
-
-    const handleLoadMore = () => {
-        if (list.length >= total) return;
-
-        const nextPage = page + 1;
-        setPage(nextPage);
-        fetchAssets(nextPage, true);
     };
 
     useEffect(() => {
@@ -128,12 +121,19 @@ const AssetList = () => {
 
     useEffect(() => {
         fetchAssets(1, false);
-        setUserRole(user?.role.permission.asset ?? []);
     }, []);
+
+    const handleLoadMore = () => {
+        if (list.length >= total) return;
+
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchAssets(nextPage, true);
+    };
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        setSearch("");
+
         setPage(1);
         await fetchAssets(1, false);
 
@@ -143,7 +143,7 @@ const AssetList = () => {
     const [selectedId, setSelectedId] = useState<number>();
 
     const renderItem = ({ item }: { item: AssetItem }) => {
-        // const backgroundColor = item.id === selectedId ? "#6e3b6e" : "#f9c2ff";
+        const backgroundColor = item.id === selectedId ? "#6e3b6e" : "#f9c2ff";
         const color = item.id === selectedId ? "white" : "black";
         return (
             <Item
@@ -155,7 +155,7 @@ const AssetList = () => {
                         params: { id: item.id },
                     } as Href);
                 }}
-                backgroundColor='#ffff'
+                backgroundColor={backgroundColor}
                 textColor={color}
             />
         );
@@ -164,38 +164,37 @@ const AssetList = () => {
     return (
         <View className='flex-1'>
             {errors.permission && <Text className='text-red-500'>{errors.permission}</Text>}
-
-            <View className='search-bar p-2'>
-                <TextInput
-                    className='border border-gray-200 rounded-xl p-4 bg-gray-50 text-gray-800 focus:border-gray-400'
-                    placeholder='Type Asset Name'
-                    value={search}
-                    onChangeText={setSearch}
-                    placeholderTextColor='#9CA3AF'
-                />
-            </View>
-            {loading && initialLoad && list.length === 0 ? (
+            {loading ? (
                 <View className='flex flex-row justify-center items-center'>
                     <ActivityIndicator size='large' />
                 </View>
             ) : (
                 <>
-                    <Text style={{ marginHorizontal: 10 }} className='text-gray-500 text-xl p-2'>
+                    <View className='search-bar p-2'>
+                        <TextInput
+                            className='border border-gray-200 rounded-xl p-4 bg-gray-50 text-gray-800 focus:border-gray-400'
+                            placeholder='Type Asset Name'
+                            value={search}
+                            onChangeText={setSearch}
+                            placeholderTextColor='#9CA3AF'
+                        />
+                    </View>
+                    <Text style={{ marginHorizontal: 10 }}>
                         Showing {list.length} of {total || list.length}
                     </Text>
+
                     {list.length !== 0 ? (
                         <FlatList
                             data={list}
                             renderItem={renderItem}
-                            style={{ backgroundColor: "#ffff" }}
-                            keyExtractor={(item) => item.id.toString()}
                             onEndReached={handleLoadMore}
                             onEndReachedThreshold={0.5}
+                            keyExtractor={(item) => item.id.toString()}
                             extraData={selectedId}
                             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                         />
                     ) : (
-                        <Text className='text-xl font-semibold text-center'>Data Not Found</Text>
+                        <Text>No records</Text>
                     )}
                 </>
             )}
@@ -203,40 +202,4 @@ const AssetList = () => {
     );
 };
 
-export default AssetList;
-
-//    async function fetchAssets() {
-//         try {
-//             setLoading(true);
-
-//             const filter = {
-//                 field: "name",
-//                 condition: "contains",
-//                 text: searchText,
-//             };
-
-//             const result = await GetAssetList([filter], searchText !== "" ? 0 : 1);
-
-//             if (result.has_error && result.error_code === "PERMISSION_DENIED") {
-//                 setErrors({ permission: result.message });
-//                 Alert.alert("Error", result.message);
-//             }
-
-//             if (result.has_error && result.message === "Invalid or expired session") {
-//                 Alert.alert("Session Expired", result.message, [
-//                     {
-//                         text: "Ok",
-//                         onPress: () => router.replace("/(auth)/sign-in"),
-//                     },
-//                 ]);
-//             }
-
-//             if (!result.has_error) {
-//                 setList(result?.assets);
-//             }
-//         } catch (err) {
-//             console.error("Error fetching assets:", err);
-//         } finally {
-//             setLoading(false);
-//         }
-//     }
+export default AssetListTemp;

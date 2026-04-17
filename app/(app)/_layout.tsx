@@ -24,10 +24,16 @@ export default function ProtectedLayout() {
             <GestureHandlerRootView style={{ flex: 1 }}>
                 <Stack>
                     <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
-                    <Stack.Screen name='maintenance-check' options={{ headerShown: true }} />
-                    <Stack.Screen name='pre-use-check' options={{ headerShown: true }} />
+                    <Stack.Screen
+                        name='maintenance-check'
+                        options={{ headerShown: true, title: "Maintenance Check", headerTitleAlign: "center" }}
+                    />
+                    <Stack.Screen
+                        name='pre-use-check'
+                        options={{ headerShown: true, title: "Pre Use Check", headerTitleAlign: "center" }}
+                    />
                 </Stack>
-            </GestureHandlerRootView>   
+            </GestureHandlerRootView>
         </SafeAreaProvider>
     );
 }

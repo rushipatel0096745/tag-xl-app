@@ -53,6 +53,8 @@ const FilePreviewModal = ({ visible, onRequestClose, onClose, imageUri }: Props)
     );
 };
 
+export default FilePreviewModal;
+
 const styles = StyleSheet.create({
     modalContainer: {
         maxHeight: "90%",
@@ -62,5 +64,3 @@ const styles = StyleSheet.create({
         height: 500,
     },
 });
-
-export default FilePreviewModal;

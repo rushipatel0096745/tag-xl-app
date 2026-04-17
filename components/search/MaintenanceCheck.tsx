@@ -419,7 +419,18 @@ const MaintenanceCheck = () => {
                             <TouchableOpacity
                                 key={index}
                                 style={styles.container}
-                                onPress={() => updateAnswer(activeQuestion.id, opt, "boolean")}>
+                                onPress={() => {
+                                    updateAnswer(activeQuestion.id, opt, "boolean");
+
+                                    if (activeQuestion?.question === "Fit for use?" && opt === "No") {
+                                        return;
+                                    }
+
+                                    setTimeout(() => {
+                                        const next = questions[currentIndex + 1];
+                                        if (next) setActiveQuestionId(next.id);
+                                    }, 200);
+                                }}>
                                 <View style={[styles.outerCircle, selectedAnswer === opt && styles.selectedOuter]}>
                                     {selectedAnswer === opt && <Ionicons name='checkmark' size={14} color='#fff' />}
                                 </View>
@@ -575,7 +586,7 @@ const MaintenanceCheck = () => {
                     className={`flex-1 flex-row justify-center items-center py-3 rounded-xl ${canGoNext ? "bg-[#263f94]" : "bg-gray-300"}`}>
                     <Text className='text-white text-sm font-medium'>
                         {currentIndex === questions.length - 1 ? "Submit" : "Next"}
-                        {loading && <ActivityIndicator color="#fff" />}
+                        {loading && <ActivityIndicator color='#fff' />}
                     </Text>
                 </TouchableOpacity>
             </View>

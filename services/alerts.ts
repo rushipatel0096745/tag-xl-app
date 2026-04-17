@@ -19,7 +19,7 @@ const getAuthHeaders = async () => {
     };
 };
 
-export const GetAlertList = async function (filter: Filter[] = [], serach: string = "", show_all_records = 0) {
+export const GetAlertList = async function (filter: Filter[] = [], serach: string = "", page: number = 1, page_size: number = 10, show_all_records = 0) {
     const result = await clientFetch("/company/alerts", {
         method: "POST",
         headers: {
@@ -27,6 +27,8 @@ export const GetAlertList = async function (filter: Filter[] = [], serach: strin
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
+            page: page,
+            page_size: page_size,
             show_all_records: show_all_records,
             filters: filter,
             search: serach,
@@ -38,6 +40,8 @@ export const GetAlertList = async function (filter: Filter[] = [], serach: strin
 export const GetAssetsInMaintenance = async function (
     filter: Filter[] = [],
     serach: string = "",
+    page: number = 1,
+    page_size: number = 10,
     show_all_records = 0
 ) {
     const result = await clientFetch("/company/alerts/asset-in-maintenance", {
@@ -47,6 +51,8 @@ export const GetAssetsInMaintenance = async function (
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
+            page: page,
+            page_size: page_size,
             show_all_records: show_all_records,
             filters: filter,
             search: serach,
@@ -55,7 +61,7 @@ export const GetAssetsInMaintenance = async function (
     return result;
 };
 
-export const GetAssetFailure = async function (filter: Filter[] = [], serach: string = "", show_all_records = 0) {
+export const GetAssetFailure = async function (filter: Filter[] = [], serach: string = "", page: number = 1, page_size: number = 10, show_all_records = 0) {
     const result = await clientFetch("/company/alerts/asset-failure", {
         method: "POST",
         headers: {
@@ -63,6 +69,8 @@ export const GetAssetFailure = async function (filter: Filter[] = [], serach: st
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
+            page: page,
+            page_size: page_size,
             show_all_records: show_all_records,
             filters: filter,
             search: serach,

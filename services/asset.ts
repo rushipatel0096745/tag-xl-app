@@ -30,16 +30,25 @@ export const GetDashboardData = async function () {
     return result;
 };
 
-export const GetAssetList = async function (filter: Filter[] = [], show_all_records = 0) {
+export const GetAssetList = async function (
+    filter: Filter[] = [],
+    show_all_records = 0,
+    page: number = 1,
+    page_size: number = 10,
+    searchText: string = ""
+) {
     const result = await clientFetch("/company/asset/list", {
         method: "POST",
         headers: {
             ...(await getAuthHeaders()),
-            "Content-Type": "application/json",
+            "Content-Type": "application/json", 
         },
         body: JSON.stringify({
+            page: page,
+            page_size: page_size,
             show_all_records: show_all_records,
             filters: filter,
+            search: searchText,
         }),
     });
     return result;
@@ -217,6 +226,37 @@ export const AssetInspectionLog = async function (asset_id: number, page: number
             asset_id: asset_id,
             page: page,
             page_size: page_size,
+        }),
+    });
+    return result;
+};
+
+export const GetAssetChangeLog = async function (asset_id: number, page: number = 1, page_size: number = 10) {
+    const result = await clientFetch("/company/asset/changelog", {
+        method: "POST",
+        headers: {
+            ...(await getAuthHeaders()),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            asset_id: asset_id,
+            page: page,
+            page_size: page_size,
+        }),
+    });
+    return result;
+};
+
+export const GetAnswers = async function (answer_id: number, submission_type: string) {
+    const result = await clientFetch("/company/inspection-submission", {
+        method: "POST",
+        headers: {
+            ...(await getAuthHeaders()),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            submission_type: submission_type,
+            submission_id: answer_id,
         }),
     });
     return result;

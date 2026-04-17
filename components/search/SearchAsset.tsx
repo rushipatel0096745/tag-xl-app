@@ -182,10 +182,11 @@ const SearchAsset = ({ onClose, initialTab, allowedTabs, sheetMode }: Props) => 
             <View className='flex-1'>
                 {tab === "nfc" && (
                     <NFCScanner
-                        onScan={(uid) => {
+                        onScan={(uid, resetScanner) => {
                             setUID(uid);
-                            Alert.alert("Tag detected", uid);
-                            checkTagAssigned(uid);
+                            setTimeout(() => {
+                                checkTagAssigned(uid, resetScanner);
+                            }, 300);
                         }}
                     />
                 )}
@@ -204,8 +205,6 @@ const SearchAsset = ({ onClose, initialTab, allowedTabs, sheetMode }: Props) => 
                 )}
                 {tab === "manual" && (
                     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-                        {/* <View style={{ flex: 1 }} /> */}
-
                         <View style={{ paddingHorizontal: 24, paddingBottom: 24, gap: 16 }}>
                             <View>
                                 <Text className='text-lg font-semibold mb-1'>Enter Tag UID:</Text>

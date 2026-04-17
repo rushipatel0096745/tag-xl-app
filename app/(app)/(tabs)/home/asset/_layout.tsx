@@ -10,6 +10,7 @@ export default function AssetStack() {
                 headerTitleAlign: "center",
             }}>
             <Stack.Screen name='asset-list' options={{ title: "Asset List" }} />
+            <Stack.Screen name='asset-list-temp' options={{ title: "Asset List" }} />
             <Stack.Screen name='asset-add' options={{ title: "Add Asset" }} />
             <Stack.Screen name='[id]' options={{ title: "Asset Details" }} />
             <Stack.Screen name='asset-edit' options={{ title: "Edit Asset" }} />

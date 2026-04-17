@@ -404,7 +404,18 @@ const PreUseCheck = () => {
                             <TouchableOpacity
                                 key={index}
                                 style={styles.container}
-                                onPress={() => updateAnswer(activeQuestion.id, opt, "boolean")}>
+                                onPress={() => {
+                                    updateAnswer(activeQuestion.id, opt, "boolean");
+
+                                    if (activeQuestion?.question === "Fit for use?" && opt === "No") {
+                                        return;
+                                    }
+
+                                    setTimeout(() => {
+                                        const next = questions[currentIndex + 1];
+                                        if (next) setActiveQuestionId(next.id);
+                                    }, 200);
+                                }}>
                                 <View style={[styles.outerCircle, selectedAnswer === opt && styles.selectedOuter]}>
                                     {selectedAnswer === opt && <Ionicons name='checkmark' size={14} color='#fff' />}
                                 </View>

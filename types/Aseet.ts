@@ -100,3 +100,20 @@ export interface AssetAccessLog {
     };
     created_at: string;
 }
+
+export interface AssetChangeLog {
+    id: number;
+    asset_id: number;
+    change_log: {
+        field: string;
+        new_value: any;
+        old_value: any;
+    }[];
+    submitted_by: {
+        id: number;
+        firstname: string;
+        lastname: string;
+        email: string;
+    };
+    created_at: string;
+}

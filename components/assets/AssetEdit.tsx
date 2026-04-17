@@ -14,17 +14,7 @@ import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { CameraIcon, FolderOpen, ImageIcon } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
-import {
-    ActivityIndicator,
-    Alert,
-    Linking,
-    Modal,
-    Pressable,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { Alert, Linking, Modal, Pressable, Text, TextInput, TouchableOpacity, View } from "react-native";
 import NativeDatePickerInput, { formatDate } from "../common/NativeDateTimePicker";
 import NativeDropdown from "../common/NativeDropdown";
 import AssignTagModal from "./AssignTagModal";
@@ -856,7 +846,9 @@ const AssetEdit = ({ id }: Props) => {
                 <TouchableOpacity
                     className='bg-[#263f94] rounded-xl px-3 py-2 active:opacity-80 w-full'
                     onPress={handleSave}>
-                    <Text className='text-white text-center font-semibold text-[16px]'>Save Changes</Text>
+                    <Text className='text-white text-center font-semibold text-[16px]'>
+                        Save Changes {loading && <Text>Updating....</Text>}
+                    </Text>
                 </TouchableOpacity>
             </View>
 
@@ -875,13 +867,6 @@ const AssetEdit = ({ id }: Props) => {
                     </Text>
                 </TouchableOpacity>
             </View>
-
-            {update_loading && (
-                <View className='absolute inset-0 bg-black/40 flex items-center justify-center z-50'>
-                    <ActivityIndicator size='large' color='#fff' />
-                    <Text className='text-white mt-3 font-semibold'>Updating asset...</Text>
-                </View>
-            )}
         </View>
     );
 };

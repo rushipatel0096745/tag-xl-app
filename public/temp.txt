@@ -349,3 +349,43 @@ this.validatePath is not a function
 // };
 
 // export default Step1;
+
+
+
+
+
+
+This is the api for asset fetching
+export const GetAssetList = async function (
+    filter: Filter[] = [],
+    show_all_records = 0,
+    page: number = 1,
+    page_size: number = 10
+) {
+    const result = await clientFetch("/company/asset/list", {
+        method: "POST",
+        headers: {
+            ...(await getAuthHeaders()),
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            page: page,
+            page_size: page_size,
+            show_all_records: show_all_records,
+            filters: filter,
+        }),
+    });
+    return result;
+};
+
+which takes payload as 
+{
+    "page": 1,
+    "page_size": 10,
+    "search": "AAA"
+}
+
+so for this i want implement auto kind of loading like
+at first when component renders it shows like "showing 20 of 23 result" and when i scroll in list it auto add items and it show "showing 23 of 23 results"
+
+it should also have search and it should also behve the same when searching

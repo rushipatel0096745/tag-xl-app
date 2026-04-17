@@ -1,5 +1,5 @@
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 export interface DashboardData {
@@ -77,9 +77,7 @@ const Dashboard = ({ data }: { data: DashboardData }) => {
                         })
                     }>
                     <View className='flex flex-col gap-1'>
-                        <Text className='text-2xl font-bold text-[#263f94]'>
-                            {data.total_certificate_expiry}
-                        </Text>
+                        <Text className='text-2xl font-bold text-[#263f94]'>{data.total_certificate_expiry}</Text>
                         <Text className='text-lg'>Recertification Needed</Text>
                     </View>
                 </TouchableOpacity>
@@ -142,6 +140,14 @@ const Dashboard = ({ data }: { data: DashboardData }) => {
                     }}>
                     <Text className='text-white text-center font-semibold text-xl'>Asset List</Text>
                 </TouchableOpacity>
+                {/* 
+                <TouchableOpacity
+                    className='bg-[#263f94] rounded-xl p-2 mt-6 active:opacity-80'
+                    onPress={() => {
+                        router.push("/(app)/(tabs)/home/asset/asset-list-temp");
+                    }}>
+                    <Text className='text-white text-center font-semibold text-xl'>Asset List Temp</Text>
+                </TouchableOpacity> */}
             </View>
         </View>
     );

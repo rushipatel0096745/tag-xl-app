@@ -2,7 +2,7 @@ import SearchAsset from "@/components/search/SearchAsset";
 import { Ionicons } from "@expo/vector-icons";
 import { BottomTabBar } from "@react-navigation/bottom-tabs";
 import { Tabs, useGlobalSearchParams, useRouter } from "expo-router";
-import { Home, Search, User } from "lucide-react-native";
+import { Home, User } from "lucide-react-native";
 import { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -191,7 +191,7 @@ export default function TabsLayout() {
                     name='search-asset/index'
                     options={{
                         title: "Search",
-                        tabBarIcon: ({ color }) => <Ionicons name="wifi" size={24} color={"#263f94"} />,
+                        tabBarIcon: ({ color }) => <Ionicons name='wifi' size={24} color={"#263f94"} />,
                         tabBarButton: (props) => (
                             <TouchableOpacity {...(props as any)} onPress={openSheet} style={props.style} />
                         ),

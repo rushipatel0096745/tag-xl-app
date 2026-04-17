@@ -1,11 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
 import { CameraView, FlashMode, useCameraPermissions } from "expo-camera";
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 
 type Props = { onScan: (uid: string, resetScanner: () => void) => void };
+
+const BOX_SIZE = 260;
 
 export default function QRScanner({ onScan }: Props) {
     const [permission, requestPermission] = useCameraPermissions();
@@ -22,9 +23,7 @@ export default function QRScanner({ onScan }: Props) {
         setScanned(false);
     };
 
-    if (!permission) return <Text>Loading...</Text>;
-
-    if (!permission.granted) {
+    if (!permission?.granted) {
         return (
             <View className='flex-1 justify-center items-center'>
                 <Text>We need camera permission</Text>
@@ -55,7 +54,6 @@ export default function QRScanner({ onScan }: Props) {
 
         setScanned(true);
 
-        
         setTimeout(() => {
             // onScan(data);
             onScan(data, resetScanner);
@@ -72,26 +70,27 @@ export default function QRScanner({ onScan }: Props) {
                 style={{ flex: 1 }}
                 barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
                 onBarcodeScanned={scanned ? undefined : handleScan}
-                // flash={flash}
                 enableTorch={flash === "on"}
-                // torch={flash === "on"}
             />
 
             <View className='absolute inset-0'>
-                <BlurView intensity={60} className='absolute top-0 left-0 right-0 h-[25%]' />
-                <BlurView intensity={60} className='absolute bottom-0 left-0 right-0 h-[25%]' />
-                <BlurView intensity={60} className='absolute top-[25%] bottom-[25%] left-0 w-[15%]' />
-                <BlurView intensity={60} className='absolute top-[25%] bottom-[25%] right-0 w-[15%]' />
+                <View className='bg-[rgba(0,0,0,0.6)] flex-1 w-full' />
 
-                <View className='absolute inset-0 justify-center items-center'>
-                    <View className='w-64 h-64'>
+                <View className='flex-row w-full' style={{ height: BOX_SIZE }}>
+                    <View className='bg-[rgba(0,0,0,0.6)] flex-1 h-full' />
+
+                    <View style={{ width: BOX_SIZE, height: BOX_SIZE }}>
                         <View className='absolute top-0 left-0 w-10 h-10 border-l-4 border-t-4 border-white rounded-tl-xl' />
                         <View className='absolute top-0 right-0 w-10 h-10 border-r-4 border-t-4 border-white rounded-tr-xl' />
                         <View className='absolute bottom-0 left-0 w-10 h-10 border-l-4 border-b-4 border-white rounded-bl-xl' />
                         <View className='absolute bottom-0 right-0 w-10 h-10 border-r-4 border-b-4 border-white rounded-br-xl' />
                     </View>
 
-                    <Text className='text-white mt-6 text-center text-base'>
+                    <View className='bg-[rgba(0,0,0,0.6)] flex-1 h-full' />
+                </View>
+
+                <View className='bg-[rgba(0,0,0,0.6)] flex-1 w-full items-center pt-8'>
+                    <Text className='text-white text-center text-base'>
                         {scanned ? "Redirecting..." : "Scan QR code"}
                     </Text>
                 </View>
