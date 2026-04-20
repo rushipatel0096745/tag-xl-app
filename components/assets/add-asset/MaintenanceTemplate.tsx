@@ -1,10 +1,11 @@
-import Dropdown from "@/components/common/Dropdown";
 import NativeDropdown from "@/components/common/NativeDropdown";
+import { useAuth } from "@/context/AuthContext";
 import { GetMaintenanceTemplateAssetList } from "@/services/templates";
 import { MaintenanceTemplteListItem } from "@/types/Templates";
 import { Checkbox } from "expo-checkbox";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 
 type Props = {
@@ -28,6 +29,8 @@ type QuestionCreate = {
 };
 
 const MaintenanceTemplate = ({ formData, updateForm, error, onDragStateChange }: Props) => {
+    const { logOut } = useAuth();
+
     const [preUseTempList, setPreUseTempList] = useState<MaintenanceTemplteListItem[]>([]);
     const [allQuesions, setAllQuestions] = useState<Question[]>([]);
 
@@ -123,6 +126,19 @@ const MaintenanceTemplate = ({ formData, updateForm, error, onDragStateChange }:
 
     async function fetchMaintenanceTemplates() {
         const result = await GetMaintenanceTemplateAssetList();
+
+        if (result.has_error && result.message === "Invalid or expired session") {
+            Alert.alert("Session Over", "", [
+                {
+                    text: "OK",
+                    onPress: () => {
+                        logOut();
+                        router.replace("/(auth)/sign-in");
+                    },
+                },
+            ]);
+            return;
+        }
         console.log("Manual template", result);
         setPreUseTempList(result?.maintenance_templates);
     }

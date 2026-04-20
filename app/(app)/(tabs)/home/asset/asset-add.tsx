@@ -5,7 +5,7 @@ import { View } from "react-native";
 
 const CreateAsset = () => {
     return (
-        <AppScreen>
+        <AppScreen hasHeader>
             <AddAsset />
         </AppScreen>
     );

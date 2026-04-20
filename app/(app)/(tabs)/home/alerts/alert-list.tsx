@@ -34,10 +34,10 @@ const AlertList = () => {
     const { type } = useLocalSearchParams<{ type: string }>();
     const navigation = useNavigation();
 
+    const config = ALERT_CONFIG[type] ?? ALERT_CONFIG["all"];
+
     useEffect(() => {
-        navigation.setOptions({
-            title: ALERT_CONFIG[type].title || "Alerts",
-        });
+        navigation.setOptions({ title: config.title });
     }, [type]);
 
     // function getAlertComp(type: string) {
@@ -57,12 +57,10 @@ const AlertList = () => {
     //     }
     // }
 
-    const config = ALERT_CONFIG[type] || ALERT_CONFIG["all"];
-
     {
         /* <Stack.Screen options={{ title: config.title }} /> */
     }
-    return <AppScreen>{config.component}</AppScreen>;
+    return <AppScreen hasHeader>{config.component}</AppScreen>;
 };
 
 export default AlertList;

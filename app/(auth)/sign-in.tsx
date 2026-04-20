@@ -3,8 +3,7 @@ import { clientFetch } from "@/lib/utils";
 import { LoginFormData } from "@/types/Auth";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 const SignIn = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -29,31 +28,49 @@ const SignIn = () => {
     };
 
     const Login = async function () {
-        setLoading(true);   
-        if (!validate()) return;
-        // console.log("logges in");
-        const result = await clientFetch("/company/company-login", {
-            method: "POST",
-            headers: {
-                "X-Company-ID": formData.companyId,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                email: formData.email,
-                password: formData.password,
-            }),
-        });
+        try {
+            setLoading(true);
+            if (!validate()) return;
+            const result = await clientFetch("/company/company-login", {
+                method: "POST",
+                headers: {
+                    "X-Company-ID": formData.companyId,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email: formData.email,
+                    password: formData.password,
+                }),
+            });
 
-        if (!result.has_error) {
-            console.log("Log in response: ", result);
-            await logIn(result?.company_id, result?.sid, result?.user);
+            if (result.has_error && result.error_code == "INVALID_CREDENTIALS") {
+                Alert.alert("Invalid Credentials", "Invalid email or password");
+                setLoading(false);
+                return;
+            }
+
+            if (result.has_error) {
+                Alert.alert("Error", result.message);
+                setLoading(false);
+                return;
+            }
+
+            if (!result.has_error) {
+                console.log("Log in response: ", result);
+                await logIn(result?.company_id, result?.sid, result?.user);
+                setLoading(false);
+            }
+        } catch (error) {
+            setLoading(false);
+            console.log("login error: ", error);
+        } finally {
             setLoading(false);
         }
     };
 
     return (
         <View className='flex-1 bg-gray-100 justify-center px-2'>
-            <View className='bg-white p-6 rounded-2xl shadow-md'> 
+            <View className='bg-white p-6 rounded-2xl shadow-md'>
                 <View className='mb-8'>
                     <Text className='text-gray-600 text-2xl text-center'>Sign in to continue</Text>
                 </View>
@@ -102,7 +119,7 @@ const SignIn = () => {
                         <Text className='text-white text-center font-semibold text-lg'>Login</Text>
                     </TouchableOpacity>
 
-                    {loading && <ActivityIndicator className='absolute right-10 top-9' color={'#fff'}/>}
+                    {loading && <ActivityIndicator className='absolute right-10 top-9' color={"#fff"} />}
                 </View>
             </View>
         </View>

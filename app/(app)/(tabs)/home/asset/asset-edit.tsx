@@ -9,7 +9,7 @@ const AssetEditView = () => {
 
     return (
         // <View className="flex-1">
-        <AppScreen scroll>
+        <AppScreen scroll hasHeader>
             <AssetEdit id={id} />
         </AppScreen>
         // </View>

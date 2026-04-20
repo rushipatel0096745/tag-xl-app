@@ -1,17 +1,8 @@
+import { useAuth } from "@/context/AuthContext";
 import { CheckTagAssigned, CreateTag } from "@/services/asset";
 import { router } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import {
-    ActivityIndicator,
-    Alert,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
-import { TextInput } from "react-native-gesture-handler";
+import { ActivityIndicator, Alert, Keyboard, Modal, Text, TextInput, TouchableOpacity, View } from "react-native";
 import NFCScanner from "./NFCScanner";
 import QRScanner from "./QRScanner";
 
@@ -25,6 +16,8 @@ type Props = {
 };
 
 const SearchAsset = ({ onClose, initialTab, allowedTabs, sheetMode }: Props) => {
+    const { logOut } = useAuth();
+
     // const [tab, setTab] = useState<TabType>("manual");
     const [tab, setTab] = useState<TabType>(initialTab || "manual");
     const [UID, setUID] = useState("");
@@ -53,6 +46,19 @@ const SearchAsset = ({ onClose, initialTab, allowedTabs, sheetMode }: Props) => 
     async function handleCreateTag() {
         const result = await CreateTag(UID, tab === "nfc" ? "RFID" : "QR");
 
+        if (result.has_error && result.message === "Invalid or expired session") {
+            Alert.alert("Session Over", "", [
+                {
+                    text: "OK",
+                    onPress: () => {
+                        logOut();
+                        router.push("/(auth)/sign-in");
+                    },
+                },
+            ]);
+            return;
+        }
+
         if (result.has_error) {
             Alert.alert("Error", result.message);
             return;
@@ -76,10 +82,11 @@ const SearchAsset = ({ onClose, initialTab, allowedTabs, sheetMode }: Props) => 
                     scannedUID: uid,
                 });
                 onClose?.();
+                navigationRef.current = false;
                 return;
             }
 
-            const result = await CheckTagAssigned(uid);
+            const result = await CheckTagAssigned(uid.trim());
 
             if (sheetMode === "EDIT_ASSET") {
                 // if (result.has_error && result.error_code === "RECORD_ALREADY_USED") {
@@ -92,6 +99,7 @@ const SearchAsset = ({ onClose, initialTab, allowedTabs, sheetMode }: Props) => 
                     scannedUID: uid,
                 });
                 onClose?.();
+                navigationRef.current = false;
                 return;
             }
 
@@ -122,7 +130,7 @@ const SearchAsset = ({ onClose, initialTab, allowedTabs, sheetMode }: Props) => 
 
                 if (tab === "manual") {
                     if (result.has_error && result.error_code === "RECORD_ALREADY_USED") {
-                        router.push({ pathname: "/(app)/(tabs)/search-asset/asset-detail", params: { uid: uid } });
+                        router.replace({ pathname: "/(app)/(tabs)/search-asset/asset-detail", params: { uid: uid } });
                         onClose?.();
                         return;
                     }
@@ -204,33 +212,35 @@ const SearchAsset = ({ onClose, initialTab, allowedTabs, sheetMode }: Props) => 
                     </View>
                 )}
                 {tab === "manual" && (
-                    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-                        <View style={{ paddingHorizontal: 24, paddingBottom: 24, gap: 16 }}>
-                            <View>
-                                <Text className='text-lg font-semibold mb-1'>Enter Tag UID:</Text>
-                                <TextInput
-                                    className='border rounded-lg border-gray-400 text-black bg-white p-2 text-lg'
-                                    placeholder='Enter UID'
-                                    returnKeyType='done'
-                                    onChangeText={(val) => setUID(val)}
-                                    onSubmitEditing={() => {
-                                        if (UID.trim()) checkTagAssigned(UID);
-                                    }}
-                                />
-                            </View>
-
-                            <TouchableOpacity
-                                disabled={UID.trim() === "" || loading}
-                                className='bg-[#263f94] rounded-xl py-3 items-center'
-                                onPress={() => checkTagAssigned(UID)}>
-                                {loading ? (
-                                    <ActivityIndicator size='small' color='#ffffff' />
-                                ) : (
-                                    <Text className='text-white text-[16px] font-medium'>Submit</Text>
-                                )}
-                            </TouchableOpacity>
+                    <View style={{ paddingHorizontal: 24, paddingBottom: 24, gap: 16, flex: 1 }}>
+                        <View>
+                            <Text className='text-lg font-semibold mb-1'>Enter Tag UID:</Text>
+                            <TextInput
+                                className='border rounded-lg border-gray-400 text-black bg-white p-2 text-lg'
+                                placeholder='Enter UID'
+                                returnKeyType='done'
+                                onChangeText={(val) => setUID(val)}
+                                onSubmitEditing={() => {
+                                    Keyboard.dismiss();
+                                    if (UID.trim()) checkTagAssigned(UID);
+                                }}
+                            />
                         </View>
-                    </KeyboardAvoidingView>
+
+                        <TouchableOpacity
+                            disabled={UID.trim() === "" || loading}
+                            className='bg-[#263f94] rounded-xl py-3 items-center'
+                            onPress={() => {
+                                Keyboard.dismiss();
+                                checkTagAssigned(UID);
+                            }}>
+                            {loading ? (
+                                <ActivityIndicator size='small' color='#ffffff' />
+                            ) : (
+                                <Text className='text-white text-[16px] font-medium'>Submit</Text>
+                            )}
+                        </TouchableOpacity>
+                    </View>
                 )}
             </View>
 

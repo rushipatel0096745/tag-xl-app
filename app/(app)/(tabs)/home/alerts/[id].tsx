@@ -6,7 +6,7 @@ import React from "react";
 const AlertEditView = () => {
     const { id } = useLocalSearchParams<{ id: string }>();
     return (
-        <AppScreen>
+        <AppScreen hasHeader>
             <AlertEdit id={id} />
         </AppScreen>
     );

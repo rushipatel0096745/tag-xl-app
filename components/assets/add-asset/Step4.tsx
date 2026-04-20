@@ -110,7 +110,7 @@ const Step4 = ({ next, prev, updateForm, validate, formData, handleSubmit, error
                         <TouchableOpacity
                             className='py-3 px-4 border border-[#263f94] rounded-xl justify-center items-center'
                             onPress={prev}>
-                            <Text className='text-[#263f94] text-[14px] font-medium'>Back</Text>s
+                            <Text className='text-[#263f94] text-[14px] font-medium'>Back</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             className='bg-green-500 rounded-xl py-3 px-4 items-center self-end'

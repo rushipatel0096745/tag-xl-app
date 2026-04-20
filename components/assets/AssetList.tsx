@@ -5,6 +5,7 @@ import { Href, router, useNavigation } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     Image,
     RefreshControl,
@@ -25,7 +26,11 @@ const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => (
     <TouchableOpacity onPress={onPress} className='flex flex-row items-center border-b border-gray-300 gap-3 p-3'>
         <View className='w-16'>
             <Image
-                source={{ uri: `https://api.tagxl.com/${item?.image}` }}
+                source={
+                    item?.image
+                        ? { uri: `https://api.tagxl.com/${item?.image}` }
+                        : require("@/assets/images/image_placeholder.png")
+                }
                 style={{ width: 50, height: 50 }}
                 resizeMode='cover'
                 className='rounded-xl'
@@ -49,7 +54,7 @@ const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => (
             )}
 
             {item.status === 2 && (
-                <Text className='text-red-600 bg-red-100 px-3 py-1 rounded-full text-xs font-semibold'>BAD</Text>
+                <Text className='text-red-600 bg-red-100 px-3 py-1 rounded-full text-xs font-semibold'>DAMAGED</Text>
             )}
         </View>
     </TouchableOpacity>
@@ -68,7 +73,7 @@ const AssetList = () => {
     const [total, setTotal] = useState(0);
     const [search, setSearch] = useState("");
 
-    const { user } = useAuth();
+    const { user, logOut } = useAuth();
     // const debouncedSearch = useDebounce(searchText, 500);
 
     const [refreshing, setRefreshing] = useState(false);
@@ -90,6 +95,19 @@ const AssetList = () => {
             }
 
             const res = await GetAssetList([], 0, pageNumber, 20, search);
+
+            if (res.has_error && res.message === "Invalid or expired session") {
+                Alert.alert("Session Over", "", [
+                    {
+                        text: "OK",
+                        onPress: () => {
+                            logOut();
+                            router.replace("/(auth)/sign-in");
+                        },
+                    },
+                ]);
+                return;
+            }
 
             const newData = res?.assets || [];
             const totalCount = res?.total || 0;

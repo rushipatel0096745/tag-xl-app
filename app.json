@@ -1,83 +1,90 @@
 {
-  "expo": {
-    "name": "tag-xl",
-    "slug": "tag-xl",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "tagxl",
-    "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.rushikesh4556.tagxl"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "softwareKeyboardLayoutMode": "pan",
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.INTERNET",
-        "android.permission.NFC"
-      ],
-      "package": "com.rushikesh4556.tagxl"
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
+    "expo": {
+        "name": "tag-xl",
+        "slug": "tag-xl",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "icon": "./assets/images/icon.png",
+        "scheme": "tagxl",
+        "userInterfaceStyle": "automatic",
+        "newArchEnabled": true,
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "com.rushikesh4556.tagxl",
+            "infoPlist": {
+                "ITSAppUsesNonExemptEncryption": false
+            }
+        },
+        "android": {
+            "softwareKeyboardLayoutMode": "resize",
+            "adaptiveIcon": {
+                "backgroundColor": "#E6F4FE",
+                "foregroundImage": "./assets/images/android-icon-foreground.png",
+                "backgroundImage": "./assets/images/android-icon-background.png",
+                "monochromeImage": "./assets/images/android-icon-monochrome.png"
+            },
+            "edgeToEdgeEnabled": true,
+            "predictiveBackGestureEnabled": false,
+            "permissions": [
+                "android.permission.READ_EXTERNAL_STORAGE",
+                "android.permission.WRITE_EXTERNAL_STORAGE",
+                "android.permission.INTERNET",
+                "android.permission.NFC"
+            ],
+            "package": "com.rushikesh4556.tagxl"
+        },
+        "web": {
+            "output": "static",
+            "favicon": "./assets/images/favicon.png"
+        },
+        "plugins": [
+            "expo-router",
+            [
+                "expo-splash-screen",
+                {
+                    "image": "./assets/images/splash-icon.png",
+                    "imageWidth": 200,
+                    "resizeMode": "contain",
+                    "backgroundColor": "#ffffff",
+                    "dark": {
+                        "backgroundColor": "#000000"
+                    }
+                }
+            ],
+            [
+                "expo-file-system",
+                {
+                    "supportsOpeningDocumentsInPlace": true,
+                    "enableFileSharing": true
+                }
+            ],
+            [
+                "expo-image-picker",
+                {
+                    "photosPermission": "custom photos permission",
+                    "cameraPermission": "Allow TAGXL to open the camera",
+                    "//": "Disables the microphone permission",
+                    "microphonePermission": false
+                }
+            ],
+            "expo-secure-store",
+            "@react-native-community/datetimepicker",
+            "react-native-nfc-manager"
+        ],
+        "experiments": {
+            "typedRoutes": true,
+            "reactCompiler": true
+        },
+        "extra": {
+            "router": {},
+            "eas": {
+                "projectId": "38d5c571-5ee1-4395-b99f-d922de29c106"
+            }
+        },
+        "owner": "rushikesh4556",
+        "androidStatusBar": {
+            "translucent": false,
+            "backgroundColor": "#ffffff"
         }
-      ],
-      [
-        "expo-file-system",
-        {
-          "supportsOpeningDocumentsInPlace": true,
-          "enableFileSharing": true
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "custom photos permission",
-          "cameraPermission": "Allow TAGXL to open the camera",
-          "//": "Disables the microphone permission",
-          "microphonePermission": false
-        }
-      ],
-      "expo-secure-store",
-      "@react-native-community/datetimepicker",
-      "react-native-nfc-manager"
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    },
-    "extra": {
-      "router": {},
-      "eas": {
-        "projectId": "38d5c571-5ee1-4395-b99f-d922de29c106"
-      }
-    },
-    "owner": "rushikesh4556"
-  }
+    }
 }

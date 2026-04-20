@@ -2,13 +2,13 @@ import NativeDateTimePicker from "@/components/common/NativeDateTimePicker";
 import NativeDropdown from "@/components/common/NativeDropdown";
 import * as DocumentPicker from "expo-document-picker";
 // import { Image } from "expo-image";
-import FilePreviewModal from "@/components/common/FilePreviewModal";
 import NativeDatePickerInput, { formatDate as dateFormat } from "@/components/common/NativeDateTimePicker";
 import { validateFileSize } from "@/lib/utils";
 import * as ImagePicker from "expo-image-picker";
 import { CameraIcon, FolderOpen, ImageIcon, Upload, X } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Image, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import FilePreviewModal from "@/components/common/FilePreviewModal";
 
 interface Props {
     next: () => void;
@@ -28,30 +28,26 @@ type UploadedFile = {
 
 const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-    const [OEMfile, setOEMFile] = useState<UploadedFile | null>(formData.oem_certificate || null);
-    const [third_party_file, setThirdPartyFile] = useState<UploadedFile | null>(
-        formData.third_party_certificate || null
-    );
+    const [OEMfile, setOEMFile] = useState<UploadedFile | null>(() => {
+        if (!formData.oem_certificate) return null;
+        return {
+            uri: formData.oem_certificate.uri,
+            name: formData.oem_certificate.name,
+            mimeType: formData.oem_certificate.type || formData.oem_certificate.mimeType,
+        };
+    });
+    const [third_party_file, setThirdPartyFile] = useState<UploadedFile | null>(() => {
+        if (!formData.third_party_certificate) return null;
+        return {
+            uri: formData.third_party_certificate.uri,
+            name: formData.third_party_certificate.name,
+            mimeType: formData.third_party_certificate.type || formData.third_party_certificate.mimeType,
+        };
+    });
     const [previewModalOpen, setPreviewModalOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (formData.oem_certificate && !OEMfile) {
-            setOEMFile({
-                uri: formData.oem_certificate.uri,
-                name: formData.oem_certificate.name,
-                mimeType: formData.oem_certificate.type,
-            });
-        }
 
-        if (formData.third_party_certificate && !third_party_file) {
-            setThirdPartyFile({
-                uri: formData.third_party_certificate.uri,
-                name: formData.third_party_certificate.name,
-                mimeType: formData.third_party_certificate.type,
-            });
-        }
-    }, []);
 
     const parseDate = (date: any) => {
         if (!date) return undefined;
@@ -81,12 +77,14 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
 
     const [startDate, setStartDate] = useState<Date | null>(parseDate(formData.third_party_start_date) || null);
     const [expiryDate, setExpiryDate] = useState<Date | null>(parseDate(formData.third_party_expiry_date) || null);
+    const [frequency, setFrequency] = useState<string | number>(formData.frequency || "");
 
-    const [frequency, setFrequency] = useState<string | number>(
-        deriveCustomDate(formData.third_party_start_date, formData.third_party_expiry_date)
-    );
+    // const [frequency, setFrequency] = useState<string | number>(
+    //     deriveCustomDate(formData.third_party_start_date, formData.third_party_expiry_date)
+    // );
 
     function handleFrequencySelection(item: string) {
+        updateForm("frequency", item);
         setFrequency(item);
 
         if (item === "custom") {
@@ -145,10 +143,14 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
             setOEMFile(null);
             updateForm("oem_certificate", null);
         } else {
+            updateForm("third_party_certificate", null);
+            updateForm("third_party_start_date", null);
+            updateForm("third_party_expiry_date", null);
+            updateForm("frequency", "");
             setThirdPartyFile(null);
             setStartDate(null);
             setExpiryDate(null);
-            updateForm("third_party_certificate", null);
+            setFrequency("");
         }
     };
 
@@ -169,7 +171,8 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
 
         const result = await ImagePicker.launchCameraAsync({
             quality: 0.8,
-            allowsEditing: true,
+            allowsEditing: false,
+            cameraType: ImagePicker.CameraType.back
         });
 
         if (!result.canceled) {
@@ -247,18 +250,9 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
         console.log("OEM file: ", OEMfile);
     }, [third_party_file, OEMfile]);
 
-    function handleDate(date_type: "start" | "expiry", val: Date) {
-        if (date_type === "start") {
-            const start = val?.toISOString().split("T")[0];
-            updateForm("third_party_start_date", start);
-        }
-        if (date_type === "expiry") {
-            const expiry = val?.toISOString().split("T")[0];
-            updateForm("third_party_expiry_date", expiry);
-        }
-    }
-
     function handleSave() {
+        console.log("formData: ", JSON.stringify(formData, null, 2));
+
         if (!validate()) return;
 
         if (OEMfile) {
@@ -481,6 +475,7 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
                                     placeholder='Select the Frequency'
                                 />
                             </View>
+                            {errors.frequency && <Text className='text-red-500 text-sm mt-1'>{errors.frequency}</Text>}
 
                             {startDate && frequency && (
                                 <View className='flex-col gap-2'>
@@ -502,6 +497,11 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
                                                 </Text>
                                             </View>
                                         </>
+                                    )}
+                                    {errors.third_party_expiry_date && (
+                                        <Text className='text-red-500 text-sm mt-1'>
+                                            {errors.third_party_expiry_date}
+                                        </Text>
                                     )}
                                 </View>
                             )}

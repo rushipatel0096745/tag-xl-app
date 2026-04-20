@@ -1,3 +1,4 @@
+import { useAuth } from "@/context/AuthContext";
 import { validateFileSize } from "@/lib/utils";
 import { CreateLocation, GetAsset, GetLocationList, UpdateAsset } from "@/services/asset";
 import {
@@ -34,6 +35,8 @@ type Props = {
 };
 
 const AssetEdit = ({ id }: Props) => {
+    const { user, logOut } = useAuth();
+
     const [asset, setAsset] = useState<AssetDetail>();
     const [scannedUID, setScannedUID] = useState("");
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -141,6 +144,19 @@ const AssetEdit = ({ id }: Props) => {
 
             if (result.has_error && result.error_code === "PERMISSION_DENIED") {
                 Alert.alert("Asset", "Permission Denied to Update Asset");
+            }
+
+            if (result.has_error && result.message === "Invalid or expired session") {
+                Alert.alert("Session Over", "", [
+                    {
+                        text: "OK",
+                        onPress: () => {
+                            logOut();
+                            router.replace("/(auth)/sign-in");
+                        },
+                    },
+                ]);
+                return;
             }
 
             if (result.has_error) {

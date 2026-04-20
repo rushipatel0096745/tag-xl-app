@@ -1,11 +1,10 @@
 import { useAuth } from "@/context/AuthContext";
-import { useDebounce } from "@/context/useDebounce";
 import { GetAlertList } from "@/services/alerts";
 import { AlertListItem } from "@/types/Alert";
 import { Image } from "expo-image";
 import { Href, router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 type ItemProps = {
     item: AlertListItem;
@@ -30,7 +29,25 @@ const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => (
         </View>
         <View className='content w-20 content-center'>
             {item.status === 0 && (
-                <Text className='text-green-500 bg-green-100 rounded-full px-1 py-1 text-xs font-extrabold'>GOOD</Text>
+                <Text className='text-yellow-600 bg-yellow-200 rounded-full px-1 py-1 text-xs font-extrabold'>
+                    PENDING
+                </Text>
+            )}
+
+            {item.status === 1 && (
+                <Text className='text-blue-600 bg-blue-200 rounded-full px-1 py-1 text-xs font-extrabold'>
+                    PROCESSING
+                </Text>
+            )}
+
+            {item.status === 2 && (
+                <Text className='text-green-600 bg-green-200 rounded-full px-1 py-1 text-xs font-extrabold'>
+                    COMPLETE
+                </Text>
+            )}
+
+            {item.status === 3 && (
+                <Text className='text-red-600 bg-red-200 rounded-full px-1 py-1 text-xs font-extrabold'>DAMAGED</Text>
             )}
         </View>
     </TouchableOpacity>
@@ -39,15 +56,19 @@ const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => (
 const RecertificationList = () => {
     const [list, setList] = useState<AlertListItem[]>([]);
     const [userRole, setUserRole] = useState<string[]>([]);
-    const [searchText, setSearchText] = useState("");
+    const [search, setSearch] = useState("");
+    const [page, setPage] = useState(1);
+    const [total, setTotal] = useState(0);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(true);
-    const { user } = useAuth();
-    const debouncedSearch = useDebounce(searchText, 500);
+    const [initialLoad, setInitialLoad] = useState(true);
+    const { user, logOut } = useAuth();
 
-    async function fetchAlerts() {
+    const fetchAlerts = async (pageNumber = 1, isLoadMore = false) => {
         try {
-            setLoading(true);
+            if (!isLoadMore && pageNumber === 1 && list.length === 0) {
+                setLoading(true);
+            }
 
             const filter = {
                 field: "alert_type",
@@ -55,26 +76,64 @@ const RecertificationList = () => {
                 text: "certificate_expired",
             };
 
-            const result = await GetAlertList([filter], searchText, searchText !== "" ? 0 : 1);
+            const res = await GetAlertList([filter], search, pageNumber, 20, 0);
 
-            if (result.has_error && result.error_code === "PERMISSION_DENIED") {
-                setErrors({ permission: result.message });
+            if (res.has_error && res.error_code === "PERMISSION_DENIED") {
+                Alert.alert("Alert", "Permission Denied");
             }
 
-            if (!result.has_error) {
-                setList(result?.alerts);
+            if (res.has_error && res.message === "Invalid or expired session") {
+                Alert.alert("Session Over", "", [
+                    {
+                        text: "OK",
+                        onPress: () => {
+                            logOut();
+                            router.replace("/(auth)/sign-in");
+                        },
+                    },
+                ]);
+                return;
+            }
+
+            const newData = res?.alerts || [];
+            const totalCount = res?.total || 0;
+
+            setTotal(totalCount);
+
+            if (isLoadMore) {
+                setList((prev) => [...prev, ...newData]);
+            } else {
+                setList(newData);
             }
         } catch (err) {
-            console.error("Error fetching assets:", err);
+            console.log(err);
         } finally {
             setLoading(false);
+            setInitialLoad(false);
         }
-    }
+    };
+
+    const handleLoadMore = () => {
+        if (list.length >= total) return;
+
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchAlerts(nextPage, true);
+    };
 
     useEffect(() => {
-        fetchAlerts();
+        const delay = setTimeout(() => {
+            setPage(1);
+            fetchAlerts(1, false);
+        }, 400);
+
+        return () => clearTimeout(delay);
+    }, [search]);
+
+    useEffect(() => {
+        fetchAlerts(1, false);
         setUserRole(user?.role.permission.asset ?? []);
-    }, [debouncedSearch]);
+    }, []);
 
     const [selectedId, setSelectedId] = useState<number>();
 
@@ -100,21 +159,27 @@ const RecertificationList = () => {
     return (
         <View>
             {errors.permission && <Text className='text-red-500'>{errors.permission}</Text>}
-            {loading ? (
+
+            <View className='search-bar p-2'>
+                <TextInput
+                    className='border border-gray-200 rounded-xl p-4 bg-gray-50 text-gray-800 focus:border-gray-400'
+                    placeholder='Type Asset Name'
+                    value={search}
+                    onChangeText={setSearch}
+                    placeholderTextColor='#9CA3AF'
+                />
+            </View>
+
+            {loading && initialLoad && list.length === 0 ? (
                 <View className='flex flex-row justify-center items-center'>
                     <ActivityIndicator size='large' />
                 </View>
             ) : (
                 <>
-                    <View className='search-bar p-2'>
-                        <TextInput
-                            className='border border-gray-200 rounded-xl p-4 bg-gray-50 text-gray-800 focus:border-gray-400'
-                            placeholder='Type Asset Name'
-                            value={searchText}
-                            onChangeText={(text) => setSearchText(text)}
-                            placeholderTextColor='#9CA3AF'
-                        />
-                    </View>
+                    <Text style={{ marginHorizontal: 10 }} className='text-gray-500 text-xl p-2'>
+                        Showing {list.length} of {total || list.length}
+                    </Text>
+
                     {list?.length !== 0 ? (
                         <FlatList
                             data={list}
@@ -123,7 +188,7 @@ const RecertificationList = () => {
                             extraData={selectedId}
                         />
                     ) : (
-                        <Text className="text-xl font-semibold text-center">Data Not Found</Text>
+                        <Text className='text-xl font-semibold text-center'>Data Not Found</Text>
                     )}
                 </>
             )}

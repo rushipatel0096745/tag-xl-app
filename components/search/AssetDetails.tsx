@@ -1,3 +1,4 @@
+import { useAuth } from "@/context/AuthContext";
 import { GetAssetWithTag } from "@/services/asset";
 import { AssetDetail } from "@/types/Aseet";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,6 +7,8 @@ import React, { useEffect, useState } from "react";
 import { Alert, Linking, Text, TouchableOpacity, View } from "react-native";
 
 const AssetDetails = ({ uid }: { uid: string }) => {
+    const { user, logOut } = useAuth();
+
     const [asset, setAsset] = useState<AssetDetail | null>(null);
 
     async function fetchAssetWithTag() {
@@ -16,11 +19,14 @@ const AssetDetails = ({ uid }: { uid: string }) => {
             Alert.alert("Permission Denied");
         }
 
-        if (result.has_error && result.message === "Invalid Session") {
+        if (result.has_error && result.message === "Invalid or expired session") {
             Alert.alert("Session Over", "", [
                 {
                     text: "OK",
-                    onPress: () => router.push("/(auth)/sign-in"),
+                    onPress: () => {
+                        logOut();
+                        router.push("/(auth)/sign-in");
+                    },
                 },
             ]);
             return;
@@ -51,10 +57,11 @@ const AssetDetails = ({ uid }: { uid: string }) => {
     };
 
     useEffect(() => {
+        setAsset(null); // Clear old asset data
         fetchAssetWithTag();
         console.log("uid: ", uid);
         console.log(new Date().toString());
-    }, []);
+    }, [uid]);
 
     function formatDateTime(dateString: string) {
         if (!dateString) return "";
@@ -85,6 +92,15 @@ const AssetDetails = ({ uid }: { uid: string }) => {
 
     return (
         <View className='flex-1 gap-4 p-4'>
+            {asset?.is_asset_fail && (
+                <View className='warning gap-2 border-2 border-red-400 rounded-2xl bg-red-100 p-4'>
+                    <View className='flex-row justify-center items-center gap-2'>
+                        <Ionicons name='warning' size={24} color='#f87171' />
+                        <Text className='text-red-400 font-semibold text-2xl'>WARNING</Text>
+                    </View>
+                    <Text className='text-red-400 text-center'>This asset is not in working condition</Text>
+                </View>
+            )}
             <View className='gap-2'>
                 <Text className='text-gray-600'>Asset Name: </Text>
                 <Text className='text-lg'>{asset?.name}</Text>
@@ -156,24 +172,30 @@ const AssetDetails = ({ uid }: { uid: string }) => {
                             <Text className='text-white text-xl font-medium text-center'>Safe use instructions</Text>
                         </TouchableOpacity>
                     </View>
-                    <View className='items-center w-full'>
-                        <TouchableOpacity
-                            className='bg-[#263f94] rounded-xl py-3 px-4 items-center w-full'
-                            onPress={() =>
-                                router.push({ pathname: "/pre-use-check", params: { asset_id: asset?.id } })
-                            }>
-                            <Text className='text-white text-xl font-medium text-center'>Pre-use Check</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View className='items-center w-full'>
-                        <TouchableOpacity
-                            className='bg-[#263f94] rounded-xl py-3 px-4 items-center w-full'
-                            onPress={() =>
-                                router.push({ pathname: "/maintenance-check", params: { asset_id: asset?.id } })
-                            }>
-                            <Text className='text-white text-xl font-medium text-center'>Maintenance Check</Text>
-                        </TouchableOpacity>
-                    </View>
+
+                    {!asset?.is_asset_fail && (
+                        <View className='items-center w-full'>
+                            <TouchableOpacity
+                                className='bg-[#263f94] rounded-xl py-3 px-4 items-center w-full'
+                                onPress={() =>
+                                    router.push({ pathname: "/pre-use-check", params: { asset_id: asset?.id } })
+                                }>
+                                <Text className='text-white text-xl font-medium text-center'>Pre-use Check</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    {!asset?.is_asset_fail && (
+                        <View className='items-center w-full'>
+                            <TouchableOpacity
+                                className='bg-[#263f94] rounded-xl py-3 px-4 items-center w-full'
+                                onPress={() =>
+                                    router.push({ pathname: "/maintenance-check", params: { asset_id: asset?.id } })
+                                }>
+                                <Text className='text-white text-xl font-medium text-center'>Maintenance Check</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
             </View>
         </View>

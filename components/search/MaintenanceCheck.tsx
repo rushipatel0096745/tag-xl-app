@@ -40,7 +40,7 @@ type UploadedFile = {
 const MaintenanceCheck = () => {
     const { asset_id } = useLocalSearchParams();
 
-    const { user } = useAuth();
+    const { user, logOut } = useAuth();
 
     const [asset, setAsset] = useState<AssetDetail | null>(null);
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -60,6 +60,20 @@ const MaintenanceCheck = () => {
 
             if (result.has_error && result.error_code === "PERMISSION_DENIED") {
                 setErrors({ permission: result.message });
+                Alert.alert("Permission Denied");
+            }
+
+            if (result.has_error && result.message === "Invalid or expired session") {
+                Alert.alert("Session Over", "", [
+                    {
+                        text: "OK",
+                        onPress: () => {
+                            logOut();
+                            router.push("/(auth)/sign-in");
+                        },
+                    },
+                ]);
+                return;
             }
 
             if (!result.has_error) {
@@ -258,11 +272,6 @@ const MaintenanceCheck = () => {
         setLoading(true);
 
         try {
-            if (!uploadedFile) {
-                Alert.alert("Photo", "Photo is required");
-                return;
-            }
-
             const answerData = answers.map((a) => {
                 const question = questions.find((q) => q.id === a.questionId);
                 return {
@@ -273,6 +282,11 @@ const MaintenanceCheck = () => {
 
             const fitForUse = answerData.find((item) => item.question === "Fit for use?");
             const remarks = answerData.find((item) => item.question === "Remarks?");
+
+            if (fitForUse?.answer === "No" && !uploadedFile) {
+                Alert.alert("Image Required", "Please upload an Image");
+                return;
+            }
 
             const otherAnswers = answerData.filter(
                 (item) => item.question !== "Fit for use?" && item.question !== "Remarks?"
@@ -437,48 +451,6 @@ const MaintenanceCheck = () => {
                                 <Text className='text-lg'>{opt}</Text>
                             </TouchableOpacity>
                         ))}
-                        {activeQuestion?.question === "Fit for use?" && selectedAnswer === "No" && (
-                            <>
-                                {uploadedFile && (
-                                    <View className='flex-row flex-wrap gap-2 mb-2'>
-                                        <View className='relative'>
-                                            {uploadedFile.type === "image" ? (
-                                                <Image
-                                                    source={{ uri: uploadedFile.uri }}
-                                                    className='w-20 h-20 rounded-xl bg-gray-100'
-                                                    resizeMode='cover'
-                                                />
-                                            ) : (
-                                                <View className='w-20 h-20 rounded-xl bg-blue-50 border border-blue-100 items-center justify-center gap-1'>
-                                                    <FileText size={24} color='#263f94' />
-                                                    <Text
-                                                        className='text-[10px] text-gray-500 px-1 text-center'
-                                                        numberOfLines={2}>
-                                                        {uploadedFile?.name}
-                                                    </Text>
-                                                </View>
-                                            )}
-                                            {/* Remove button */}
-                                            <TouchableOpacity
-                                                onPress={() => removeFile()}
-                                                className='absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full items-center justify-center'>
-                                                <X size={10} color='white' strokeWidth={3} />
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                )}
-                                <TouchableOpacity
-                                    onPress={handleUploadPress}
-                                    className='border-2 border-dashed border-[#263f94]/40 rounded-2xl py-8 items-center gap-3 active:opacity-70 active:bg-blue-50'>
-                                    <View className='w-12 h-12 bg-[#263f94]/10 rounded-2xl items-center justify-center'>
-                                        <Upload size={22} color='#263f94' />
-                                    </View>
-                                    <View className='items-center gap-1'>
-                                        <Text className='font-semibold text-[#263f94]'>Add Image</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            </>
-                        )}
                     </View>
                 )}
 
@@ -490,49 +462,6 @@ const MaintenanceCheck = () => {
                             value={(selectedAnswer as string) || ""}
                             onChangeText={(val) => updateAnswer(activeQuestion.id, val, "text")}
                         />
-                        {activeQuestion?.question === "Remarks?" && (
-                            <>
-                                {uploadedFile && (
-                                    <View className='flex-row flex-wrap gap-2 mb-2'>
-                                        <View className='relative'>
-                                            {uploadedFile.type === "image" ? (
-                                                <Image
-                                                    source={{ uri: uploadedFile.uri }}
-                                                    className='w-20 h-20 rounded-xl bg-gray-100'
-                                                    resizeMode='cover'
-                                                />
-                                            ) : (
-                                                <View className='w-20 h-20 rounded-xl bg-blue-50 border border-blue-100 items-center justify-center gap-1'>
-                                                    <FileText size={24} color='#263f94' />
-                                                    <Text
-                                                        className='text-[10px] text-gray-500 px-1 text-center'
-                                                        numberOfLines={2}>
-                                                        {uploadedFile?.name}
-                                                    </Text>
-                                                </View>
-                                            )}
-                                            {/* Remove button */}
-                                            <TouchableOpacity
-                                                onPress={() => removeFile()}
-                                                className='absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full items-center justify-center'>
-                                                <X size={10} color='white' strokeWidth={3} />
-                                            </TouchableOpacity>
-                                        </View>
-                                    </View>
-                                )}
-
-                                <TouchableOpacity
-                                    onPress={handleUploadPress}
-                                    className='border-2 border-dashed border-[#263f94]/40 rounded-2xl py-8 items-center gap-3 active:opacity-70 active:bg-blue-50'>
-                                    <View className='w-12 h-12 bg-[#263f94]/10 rounded-2xl items-center justify-center'>
-                                        <Upload size={22} color='#263f94' />
-                                    </View>
-                                    <View className='items-center gap-1'>
-                                        <Text className='font-semibold text-[#263f94]'>Add Image</Text>
-                                    </View>
-                                </TouchableOpacity>
-                            </>
-                        )}
                     </View>
                 )}
 
@@ -569,6 +498,48 @@ const MaintenanceCheck = () => {
                     </View>
                 )}
             </View>
+
+            {answers.find((a) => a.questionId === questions.find((q) => q.question === "Fit for use?")?.id)?.answer ===
+                "No" && (
+                <>
+                    {uploadedFile && (
+                        <View className='flex-row flex-wrap gap-2 mb-2'>
+                            <View className='relative'>
+                                {uploadedFile.uri ? (
+                                    <Image
+                                        source={{ uri: uploadedFile.uri }}
+                                        className='w-20 h-20 rounded-xl bg-gray-100'
+                                        resizeMethod='resize'
+                                    />
+                                ) : (
+                                    <View className='w-20 h-20 rounded-xl bg-blue-50 border border-blue-100 items-center justify-center gap-1'>
+                                        <FileText size={24} color='#263f94' />
+                                        <Text className='text-[10px] text-gray-500 px-1 text-center' numberOfLines={2}>
+                                            {uploadedFile?.name}
+                                        </Text>
+                                    </View>
+                                )}
+                                {/* Remove button */}
+                                <TouchableOpacity
+                                    onPress={() => removeFile()}
+                                    className='absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 rounded-full items-center justify-center'>
+                                    <X size={10} color='white' strokeWidth={3} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    )}
+                    <TouchableOpacity
+                        onPress={handleUploadPress}
+                        className='border-2 border-dashed border-[#263f94]/40 rounded-2xl py-8 items-center gap-3 active:opacity-70 active:bg-blue-50'>
+                        <View className='w-12 h-12 bg-[#263f94]/10 rounded-2xl items-center justify-center'>
+                            <Upload size={22} color='#263f94' />
+                        </View>
+                        <View className='items-center gap-1'>
+                            <Text className='font-semibold text-[#263f94]'>Add Image</Text>
+                        </View>
+                    </TouchableOpacity>
+                </>
+            )}
 
             <View className='flex-row gap-3 p-4'>
                 <TouchableOpacity

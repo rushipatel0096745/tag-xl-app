@@ -4,7 +4,7 @@ import React from "react";
 
 const AssetListView = () => {
     return (
-        <AppScreen>
+        <AppScreen hasHeader>
             <AssetList />
         </AppScreen>
     );

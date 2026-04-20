@@ -8,7 +8,7 @@ const AssetItemDetails = () => {
     const { id }: { id: string } = useLocalSearchParams();
 
     return (
-        <AppScreen>
+        <AppScreen hasHeader>
             <AssetDetails id={id} />
         </AppScreen>
     );

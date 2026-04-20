@@ -31,6 +31,7 @@ const AddAsset = () => {
         maintenance_template_id: "",
         asset_pre_use_questions: "",
         asset_maintenance_questions: "",
+        frequency: "",
     };
 
     const [formData, setFormData] = useState(INITIAL_STATE);
@@ -125,6 +126,10 @@ const AddAsset = () => {
             if (formData.third_party_certificate) {
                 if (!ALLOWED_THIRD_PARTY_TYPES.includes(formData.third_party_certificate.type)) {
                     newErrors.third_party_certificate = "Only PNG, JPG, or JPEG images and PDFs are allowed";
+                }
+
+                if (formData.frequency === "") {
+                    newErrors.frequency = "Frequency is required";
                 }
 
                 if (!formData.third_party_start_date) {

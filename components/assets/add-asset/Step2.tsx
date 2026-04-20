@@ -96,7 +96,8 @@ export const Step2 = ({ next, prev, updateForm, formData, errors, validate }: Pr
         }
         const result = await ImagePicker.launchCameraAsync({
             quality: 0.8,
-            allowsEditing: true,
+            allowsEditing: false,
+            cameraType: ImagePicker.CameraType.back
         });
         if (!result.canceled) {
             const asset = result.assets[0];

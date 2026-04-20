@@ -1,10 +1,11 @@
-import Dropdown from "@/components/common/Dropdown";
 import NativeDropdown from "@/components/common/NativeDropdown";
+import { useAuth } from "@/context/AuthContext";
 import { GetPreUseTemplateAssetList } from "@/services/templates";
 import { PreUseTemplteListItem } from "@/types/Templates";
 import { Checkbox } from "expo-checkbox";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import DraggableFlatList from "react-native-draggable-flatlist";
 
 type Props = {
@@ -28,6 +29,8 @@ type QuestionCreate = {
 };
 
 const PreUseTemplate = ({ formData, updateForm, error, onDragStateChange }: Props) => {
+    const { user, logOut } = useAuth();
+
     const [isDragging, setIsDragging] = useState(false);
 
     const [preUseTempList, setPreUseTempList] = useState<PreUseTemplteListItem[]>([]);
@@ -123,6 +126,20 @@ const PreUseTemplate = ({ formData, updateForm, error, onDragStateChange }: Prop
 
     async function fetchPreUseTemplates() {
         const result = await GetPreUseTemplateAssetList();
+
+        if (result.has_error && result.message === "Invalid or expired session") {
+            Alert.alert("Session Over", "", [
+                {
+                    text: "OK",
+                    onPress: () => {
+                        logOut();
+                        router.replace("/(auth)/sign-in");
+                    },
+                },
+            ]);
+            return;
+        }
+
         console.log("Manual template", result);
         setPreUseTempList(result?.pre_use_templates);
     }
@@ -248,7 +265,7 @@ const PreUseTemplate = ({ formData, updateForm, error, onDragStateChange }: Prop
 
             {/* <View className='border p-2 mt-1 border-gray-400 rounded-xl'>
                 {newQuestions.length !== 0 && (
-                    <View>this is not worth it i guess
+                    <View>
                         <Text className='text-lg font-semibold p-2'>New Added Questions</Text>
                         {newQuestions.map((q, index) => (
                             <View

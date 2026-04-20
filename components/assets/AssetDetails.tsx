@@ -17,6 +17,7 @@ import {
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 import { FormatDateTime } from "@/lib/utils";
+import { Ionicons } from "@expo/vector-icons";
 import * as FileSystem from "expo-file-system/legacy";
 import { router } from "expo-router";
 import { LayoutAnimation, Platform, UIManager } from "react-native";
@@ -48,7 +49,7 @@ const AssetDetails = ({ id }: { id: string }) => {
     const [accessLogCollapsed, setAccessLogCollapsed] = useState(true);
     const [changeLogCollapsed, setChangeLogCollapsed] = useState(true);
     const [locations, setLocations] = useState();
-    const { user } = useAuth();
+    const { user, logOut } = useAuth();
 
     // for access log
     const [accessLogs, setAccessLogs] = useState<AssetAccessLog[]>([]);
@@ -87,7 +88,10 @@ const AssetDetails = ({ id }: { id: string }) => {
                 Alert.alert("Session Expired", result.message, [
                     {
                         text: "Ok",
-                        onPress: () => router.replace("/(auth)/sign-in"),
+                        onPress: () => {
+                            logOut();
+                            router.replace("/(auth)/sign-in");
+                        },
                     },
                 ]);
             }
@@ -377,32 +381,50 @@ const AssetDetails = ({ id }: { id: string }) => {
             <SafeAreaView className='flex-1 m-2'>
                 <ScrollView>
                     <View className='main p-2 flex flex-col gap-2.5 justify-between'>
+                        {/* status info */}
+                        {(asset?.status === 1 || asset?.status === 2) && (
+                            <View className='warning gap-2 border-2 border-red-400 rounded-2xl bg-red-100 p-4'>
+                                <View className='flex-row justify-center items-center gap-2'>
+                                    <Ionicons name='warning' size={24} color='#f87171' />
+                                    <Text className='text-red-400 font-semibold text-2xl'>WARNING</Text>
+                                </View>
+                                <Text className='text-red-400 text-center'>This asset is not in working condition</Text>
+                            </View>
+                        )}
+
                         {/* image */}
-                        <View className='flex flex-row justify-center border rounded-xl border-gray-400'>
+                        <View className='flex flex-row justify-center border rounded-xl border-gray-400 overflow-hidden'>
                             <Image
-                                source={{ uri: `https://api.tagxl.com/${asset?.image}` }}
+                                source={
+                                    asset?.image
+                                        ? { uri: `https://api.tagxl.com/${asset.image}` }
+                                        : require("@/assets/images/image_placeholder.png")
+                                }
                                 style={{ width: "100%", height: 280 }}
-                                contentFit='scale-down'
+                                // contentFit='scale-down'
+                                contentFit='fill'
                             />
                         </View>
 
                         {/* asset-info */}
                         <View className='flex flex-col justify-between border rounded-xl border-gray-400'>
-                            <View className='flex flex-row justify-between items-center border-b border-gray-400 py-2 px-4'>
-                                <Text className='font-semibold text-[16px]'>Details</Text>
-                                <TouchableOpacity
-                                    className='bg-[#263f94] rounded-xl px-3 py-2 active:opacity-80'
-                                    onPress={() => {
-                                        router.push({
-                                            pathname: "/(app)/(tabs)/home/asset/asset-edit",
-                                            params: {
-                                                id: id,
-                                            },
-                                        });
-                                    }}>
-                                    <Text className='text-white text-center font-semibold text-sm'>Edit</Text>
-                                </TouchableOpacity>
-                            </View>
+                            {asset?.status !== 2 && (
+                                <View className='flex flex-row justify-between items-center border-b border-gray-400 py-2 px-4'>
+                                    <Text className='font-semibold text-[16px]'>Details</Text>
+                                    <TouchableOpacity
+                                        className='bg-[#263f94] rounded-xl px-3 py-2 active:opacity-80'
+                                        onPress={() => {
+                                            router.push({
+                                                pathname: "/(app)/(tabs)/home/asset/asset-edit",
+                                                params: {
+                                                    id: id,
+                                                },
+                                            });
+                                        }}>
+                                        <Text className='text-white text-center font-semibold text-sm'>Edit</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
                             <View className='flex flex-col justify-between gap-4 py-2 px-4'>
                                 <View className='asset-info flex flex-col justify-between '>
                                     <Text className='text-sm text-gray-500'>Asset Name</Text>
@@ -423,6 +445,8 @@ const AssetDetails = ({ id }: { id: string }) => {
                                 <View className='asset-info flex flex-col justify-between '>
                                     <Text className='text-sm text-gray-500'>Status</Text>
                                     {asset?.status === 0 && <Text className='text-green-700'>GOOD</Text>}
+                                    {asset?.status === 1 && <Text className='text-yellow-700'>WARNING</Text>}
+                                    {asset?.status === 2 && <Text className='text-red-700'>DAMAGED</Text>}
                                 </View>
                             </View>
                         </View>

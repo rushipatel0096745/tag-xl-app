@@ -7,7 +7,7 @@ import { Text, TouchableOpacity, View } from "react-native";
 const Profile = () => {
     const { user, logOut } = useAuth();
     return (
-        <AppScreen>
+        <AppScreen hasHeader>
             <ProfileHeader
                 firstname={user?.firstname ?? ""}
                 lastname={user?.lastname ?? ""}

@@ -60,11 +60,11 @@ const Step1 = ({ next, updateForm, validate, errors, formData }: Props) => {
 
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
-
+    
     async function handleSave() {
         if (!validate()) return;
 
-        const checkAssigned = await CheckTagAssigned(tagId || formData.uid);
+        const checkAssigned = await CheckTagAssigned(tagId.trim() || formData.uid.trim());
 
         if (checkAssigned.has_error && checkAssigned.error_code == "RECORD_ALREADY_USED") {
             setAssignError(checkAssigned.message);

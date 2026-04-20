@@ -4,7 +4,7 @@ import { AlertListItem } from "@/types/Alert";
 import { Image } from "expo-image";
 import { Href, router } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 type ItemProps = {
     item: AlertListItem;
@@ -17,7 +17,11 @@ const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => (
     <TouchableOpacity onPress={onPress} className='flex flex-row border-b border-gray-300 gap-2 p-2'>
         <View className='img w-16'>
             <Image
-                source={{ uri: `https://api.tagxl.com/${item?.asset.image}` }}
+                source={
+                    item?.asset.image
+                        ? { uri: `https://api.tagxl.com/${item?.asset.image}` }
+                        : require("@/assets/images/image_placeholder.png")
+                }
                 style={{ width: 50, height: 50 }}
                 contentFit='cover'
                 className='border-0 rounded-2xl'
@@ -33,20 +37,26 @@ const Item = ({ item, onPress, backgroundColor, textColor }: ItemProps) => (
             </Text>
         </View>
         <View className='justify-center items-end p-2'>
-            {item.status === 2 && (
-                <Text className='text-green-600 bg-green-200 rounded-full px-1 py-1 text-xs font-extrabold'>
-                    COMPLETED
-                </Text>
-            )}
             {item.status === 0 && (
                 <Text className='text-yellow-600 bg-yellow-200 rounded-full px-1 py-1 text-xs font-extrabold'>
                     PENDING
                 </Text>
             )}
+
             {item.status === 1 && (
-                <Text className='text-red-600 bg-red-200 rounded-full px-1 py-1 text-xs font-extrabold'>
-                    IN PROGRESS
+                <Text className='text-blue-600 bg-blue-200 rounded-full px-1 py-1 text-xs font-extrabold'>
+                    PROCESSING
                 </Text>
+            )}
+
+            {item.status === 2 && (
+                <Text className='text-green-600 bg-green-200 rounded-full px-1 py-1 text-xs font-extrabold'>
+                    COMPLETE
+                </Text>
+            )}
+
+            {item.status === 3 && (
+                <Text className='text-red-600 bg-red-200 rounded-full px-1 py-1 text-xs font-extrabold'>DAMAGED</Text>
             )}
         </View>
     </TouchableOpacity>
@@ -62,7 +72,7 @@ const AllAlertsList = () => {
     const [loading, setLoading] = useState(true);
     const [initialLoad, setInitialLoad] = useState(true);
 
-    const { user } = useAuth();
+    const { user, logOut } = useAuth();
 
     const fetchAlerts = async (pageNumber = 1, isLoadMore = false) => {
         try {
@@ -71,6 +81,19 @@ const AllAlertsList = () => {
             }
 
             const res = await GetAlertList([], search, pageNumber, 20, 0);
+
+            if (res.has_error && res.message === "Invalid or expired session") {
+                Alert.alert("Session Over", "", [
+                    {
+                        text: "OK",
+                        onPress: () => {
+                            logOut();
+                            router.replace("/(auth)/sign-in");
+                        },
+                    },
+                ]);
+                return;
+            }
 
             const newData = res?.alerts || [];
             const totalCount = res?.total || 0;
