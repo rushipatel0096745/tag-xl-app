@@ -16,7 +16,9 @@
             }
         },
         "android": {
-            "softwareKeyboardLayoutMode": "resize",
+            "googleServicesFile": "./google-services.json",
+            "jsEngine": "hermes",
+            "softwareKeyboardLayoutMode": "pan",
             "adaptiveIcon": {
                 "backgroundColor": "#E6F4FE",
                 "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -39,6 +41,15 @@
         },
         "plugins": [
             "expo-router",
+            [
+                "expo-build-properties",
+                {
+                    "android": {
+                        "enableShrinkResourcesInReleaseBuilds": true,
+                        "enableProguardInReleaseBuilds": true
+                    }
+                }
+            ],
             [
                 "expo-splash-screen",
                 {
@@ -67,6 +78,7 @@
                     "microphonePermission": false
                 }
             ],
+            ["expo-notifications"],
             "expo-secure-store",
             "@react-native-community/datetimepicker",
             "react-native-nfc-manager"

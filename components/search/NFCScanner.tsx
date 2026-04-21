@@ -30,6 +30,7 @@ const NFCScanner = ({ onScan }: { onScan: (uid: string, reset: () => void) => vo
     };
 
     const handleScan = async () => {
+        let timeout;
         try {
             const isSupported = await NfcManager.isSupported();
             if (!isSupported) {
@@ -44,6 +45,12 @@ const NFCScanner = ({ onScan }: { onScan: (uid: string, reset: () => void) => vo
             }
 
             setScanning(true);
+
+            timeout = setTimeout(() => {
+                NfcManager.cancelTechnologyRequest();
+                resetScanner();
+                Alert.alert("Scan timeout", "No NFC tag detected");
+            }, 10000);
 
             await NfcManager.requestTechnology(NfcTech.NfcA, {
                 alertMessage: "Hold your phone near the NFC tag",
@@ -61,7 +68,9 @@ const NFCScanner = ({ onScan }: { onScan: (uid: string, reset: () => void) => vo
             console.log("Scan error:", e);
             resetScanner();
         } finally {
+            clearTimeout(timeout);
             NfcManager.cancelTechnologyRequest();
+            resetScanner();
         }
     };
 
@@ -75,6 +84,15 @@ const NFCScanner = ({ onScan }: { onScan: (uid: string, reset: () => void) => vo
                         <Text className='text-white text-[14px] font-medium text-center'>
                             {scanning ? "Scanning..." : "Scan NFC"}
                         </Text>
+                        {scanning && (
+                            <TouchableOpacity
+                                onPress={() => {
+                                    NfcManager.cancelTechnologyRequest();   
+                                    resetScanner();
+                                }}>
+                                <Text className='text-red-500 mt-3'>Cancel Scan</Text>
+                            </TouchableOpacity>
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>

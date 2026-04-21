@@ -1,12 +1,14 @@
 import PreUseCheck from "@/components/search/PreUseCheck";
 import React from "react";
-import { View } from "react-native";
+import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
 
 const PreUseCheckView = () => {
     return (
-        <View style={{ flex: 1 }}>
-            <PreUseCheck />
-        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View style={{ flex: 1 }}>
+                <PreUseCheck />
+            </View>
+        </TouchableWithoutFeedback>
     );
 };
 

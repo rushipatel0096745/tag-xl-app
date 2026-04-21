@@ -2,13 +2,13 @@ import NativeDateTimePicker from "@/components/common/NativeDateTimePicker";
 import NativeDropdown from "@/components/common/NativeDropdown";
 import * as DocumentPicker from "expo-document-picker";
 // import { Image } from "expo-image";
+import FilePreviewModal from "@/components/common/FilePreviewModal";
 import NativeDatePickerInput, { formatDate as dateFormat } from "@/components/common/NativeDateTimePicker";
 import { validateFileSize } from "@/lib/utils";
 import * as ImagePicker from "expo-image-picker";
 import { CameraIcon, FolderOpen, ImageIcon, Upload, X } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { Alert, Image, Modal, Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import FilePreviewModal from "@/components/common/FilePreviewModal";
 
 interface Props {
     next: () => void;
@@ -46,8 +46,6 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
     });
     const [previewModalOpen, setPreviewModalOpen] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
-
-
 
     const parseDate = (date: any) => {
         if (!date) return undefined;
@@ -172,7 +170,7 @@ const Step3 = ({ next, prev, updateForm, formData, validate, errors }: Props) =>
         const result = await ImagePicker.launchCameraAsync({
             quality: 0.8,
             allowsEditing: false,
-            cameraType: ImagePicker.CameraType.back
+            cameraType: ImagePicker.CameraType.back,
         });
 
         if (!result.canceled) {

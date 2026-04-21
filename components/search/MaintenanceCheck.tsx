@@ -132,7 +132,7 @@ const MaintenanceCheck = () => {
         }
         const result = await ImagePicker.launchCameraAsync({
             quality: 0.8,
-            allowsEditing: true,
+            allowsEditing: false,
         });
         if (!result.canceled) {
             const asset = result.assets[0];
@@ -398,7 +398,7 @@ const MaintenanceCheck = () => {
             </Modal>
 
             {errors.permission && <Text className='text-red-500'>{errors.permission}</Text>}
-            <Text className='text-xl font-bold'>{asset?.name}</Text>
+            {/* <Text className='text-xl font-bold'>{asset?.name}</Text> */}
             <View>
                 <View className='question-bar flex-row gap-2 my-4 border rounded-2xl border-gray-300 p-2'>
                     {questions.map((question, index) => {

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "544166264366",
+    "project_id": "tag-xl",
+    "storage_bucket": "tag-xl.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:544166264366:android:43296c6d4b6ecd00d3e9bf",
+        "android_client_info": {
+          "package_name": "com.rushikesh4556.tagxl"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTEnNAUqDsCkA5ITI3dLB2FRIUMGbfcMU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

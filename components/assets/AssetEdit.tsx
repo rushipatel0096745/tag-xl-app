@@ -76,7 +76,7 @@ const AssetEdit = ({ id }: Props) => {
         batch_code: asset?.batch_code ?? "",
         image: asset?.image ?? ("" as any | null),
         manual_template_id: String(asset?.manual_template?.id) ?? "",
-        status: String(asset?.status) ?? "",
+        status: asset?.status !== undefined ? String(asset.status) : "0",
         third_party_certificate: asset?.third_party_certificate[0] ?? ("" as any),
         third_party_start_date: asset?.third_party_certificate[0]?.third_party_start_date ?? "",
         third_party_expiry_date: asset?.third_party_certificate[0]?.third_party_expiry_date ?? "",
@@ -96,10 +96,12 @@ const AssetEdit = ({ id }: Props) => {
         if (!formData.maintenance_template_id)
             newErrors.maintenance_template_id = "Select Maintenance Template is required";
         if (!formData.status) newErrors.status = "Select Status";
-        if (!formData.batch_code) newErrors.status = "Select Status";
         if (third_party_file) {
             if (!start_date) newErrors.start_date = "Start date is required";
             if (!end_date) newErrors.end_date = "Expiry date is required";
+            if (start_date && end_date && start_date > end_date)
+                newErrors.end_date = "Expiry date must be greater than start date";
+            if (start_date && !frequency) newErrors.frequency = "Frequency is required";
         }
         if (start_date && end_date && !third_party_file) {
             newErrors.third_party_file = "Upload Third Party Certificate";
@@ -165,13 +167,25 @@ const AssetEdit = ({ id }: Props) => {
             }
 
             if (!result.has_error) {
-                Alert.alert("Asset", "Asset Updated Successfully");
+                Alert.alert("Asset", "Asset Updated Successfully", [
+                    {
+                        text: "OK",
+                        onPress: () => loadData(),
+                        // onPress: () => {
+                        //     setImage(undefined);
+                        //     setThirdPartyFile(undefined);
+                        //     setStartDate(null);
+                        //     setEndDate(null);
+                        //     setFrequency("");
+                        //     loadData();
+                        // },
+                    },
+                ]);
             }
         } catch (error) {
             console.error("Update error:", error);
             Alert.alert("Error", "Something went wrong");
         } finally {
-            loadData();
             setUpdateLoading(false);
         }
     }
@@ -302,7 +316,8 @@ const AssetEdit = ({ id }: Props) => {
 
         const result = await ImagePicker.launchCameraAsync({
             quality: 0.8,
-            allowsEditing: true,
+            allowsEditing: false,
+            cameraType: ImagePicker.CameraType.back,
         });
 
         if (!result.canceled) {
@@ -418,12 +433,6 @@ const AssetEdit = ({ id }: Props) => {
     useEffect(() => {
         loadData();
     }, []);
-
-    // useEffect(() => {
-    //     console.log("location type: ", typeof asset?.location?.id);
-    //     console.log("Maintenance type", typeof asset?.maintenance_template?.id);
-    //     console.log("preuse type", typeof asset?.pre_use_template?.id);
-    // }, [asset]);
 
     const statusOptions = [
         { label: "Active", value: "1" },
@@ -612,7 +621,11 @@ const AssetEdit = ({ id }: Props) => {
             {/* image */}
             <View className='relative flex flex-row justify-center border rounded-xl border-gray-400'>
                 <Image
-                    source={{ uri: image ? image.uri : `https://api.tagxl.com/${formData?.image}` }}
+                    source={
+                        image?.uri || formData?.image
+                            ? { uri: image ? image.uri : `https://api.tagxl.com/${formData?.image}` }
+                            : require("@/assets/images/image_placeholder.png")
+                    }
                     style={{ width: "100%", height: 280 }}
                     contentFit='scale-down'
                 />
@@ -644,6 +657,7 @@ const AssetEdit = ({ id }: Props) => {
                     className='border border-gray-400 rounded-lg p-4 bg-white'
                     onChangeText={(val) => handleChange("name", val)}
                 />
+                {errors.name && <Text className='text-red-500'>{errors.name}</Text>}
             </View>
 
             <View className='flex-col gap-2'>
@@ -659,6 +673,7 @@ const AssetEdit = ({ id }: Props) => {
                 <Text className='text-right text-blue-700 mt-2 text-sm' onPress={() => setIsLocationModalOpen(true)}>
                     + Add New Location
                 </Text>
+                {errors.location_id && <Text className='text-red-500'>{errors.location_id}</Text>}
             </View>
 
             <View className='flex-row gap-2 items-center w-full'>
@@ -670,6 +685,7 @@ const AssetEdit = ({ id }: Props) => {
                         className='border border-gray-400 rounded-lg p-4 bg-white'
                         onChangeText={(val) => handleChange("batch_code", val)}
                     />
+                    {errors.batch_code && <Text className='text-red-500'>{errors.batch_code}</Text>}
                 </View>
                 <View className='flex-1 flex-col gap-2'>
                     <Text className='text-[16px]'>Status</Text>
@@ -679,6 +695,7 @@ const AssetEdit = ({ id }: Props) => {
                             value={formData?.status}
                             onChange={(item) => handleChange("status", item)}
                         />
+                        {errors.status && <Text className='text-red-500'>{errors.status}</Text>}
                     </View>
                 </View>
             </View>
@@ -721,6 +738,7 @@ const AssetEdit = ({ id }: Props) => {
                             ))}
                         </View>
                     )}
+                    {errors.pre_use_template_id && <Text className='text-red-500'>{errors.pre_use_template_id}</Text>}
                 </View>
             </View>
 
@@ -750,6 +768,9 @@ const AssetEdit = ({ id }: Props) => {
                             ))}
                         </View>
                     )}
+                    {errors.maintenance_template_id && (
+                        <Text className='text-red-500'>{errors.maintenance_template_id}</Text>
+                    )}
                 </View>
             </View>
 
@@ -775,6 +796,7 @@ const AssetEdit = ({ id }: Props) => {
                             )}
                         </View>
                     )}
+                    {errors.third_party_file && <Text className='text-red-500'>{errors.third_party_file}</Text>}
 
                     <View className='flex flex-col flex-wrap justify-between gap-2 py-2 px-4'>
                         {asset?.third_party_certificate && asset?.third_party_certificate.length > 0 && (
@@ -823,6 +845,7 @@ const AssetEdit = ({ id }: Props) => {
                                 }}
                                 maximumDate={new Date()}
                             />
+                            {errors.start_date && <Text className='text-red-500'>{errors.start_date}</Text>}
                         </View>
 
                         <View>
@@ -832,6 +855,7 @@ const AssetEdit = ({ id }: Props) => {
                                 value={frequency}
                                 placeholder='Select the Frequency'
                             />
+                            {errors.frequency && <Text className='text-red-500'>{errors.frequency}</Text>}
                         </View>
 
                         {start_date && frequency && (
@@ -850,6 +874,7 @@ const AssetEdit = ({ id }: Props) => {
                                                 {end_date ? formatDate(end_date) : "Calculating..."}
                                             </Text>
                                         </View>
+                                        {errors.end_date && <Text className='text-red-500'>{errors.end_date}</Text>}
                                     </>
                                 )}
                             </View>

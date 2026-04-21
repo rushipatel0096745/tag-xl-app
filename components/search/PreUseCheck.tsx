@@ -129,7 +129,7 @@ const PreUseCheck = () => {
         }
         const result = await ImagePicker.launchCameraAsync({
             quality: 0.8,
-            allowsEditing: true,
+            allowsEditing: false,
         });
         if (!result.canceled) {
             const asset = result.assets[0];

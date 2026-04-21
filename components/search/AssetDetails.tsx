@@ -168,7 +168,17 @@ const AssetDetails = ({ uid }: { uid: string }) => {
 
                 <View className='gap-2 p-2'>
                     <View className='items-center w-full'>
-                        <TouchableOpacity className='bg-[#263f94] rounded-xl py-3 px-4 items-center w-full'>
+                        <TouchableOpacity
+                            className='bg-[#263f94] rounded-xl py-3 px-4 items-center w-full'
+                            onPress={() => {
+                                if (asset?.manual_template) {
+                                    downloadFile(
+                                        ("https://api.tagxl.com/" + asset?.manual_template.files[0].file_path) as string
+                                    );
+                                } else {
+                                    Alert.alert("No safety use instructions found");
+                                }
+                            }}>
                             <Text className='text-white text-xl font-medium text-center'>Safe use instructions</Text>
                         </TouchableOpacity>
                     </View>

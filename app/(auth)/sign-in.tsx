@@ -3,7 +3,16 @@ import { clientFetch } from "@/lib/utils";
 import { LoginFormData } from "@/types/Auth";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import { ActivityIndicator, Alert, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+    ActivityIndicator,
+    Alert,
+    Keyboard,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    TouchableWithoutFeedback,
+    View,
+} from "react-native";
 
 const SignIn = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -69,60 +78,62 @@ const SignIn = () => {
     };
 
     return (
-        <View className='flex-1 bg-gray-100 justify-center px-2'>
-            <View className='bg-white p-6 rounded-2xl shadow-md'>
-                <View className='mb-8'>
-                    <Text className='text-gray-600 text-2xl text-center'>Sign in to continue</Text>
-                </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View className='flex-1 bg-gray-100 justify-center px-2'>
+                <View className='bg-white p-6 rounded-2xl shadow-md'>
+                    <View className='mb-8'>
+                        <Text className='text-gray-600 text-2xl text-center'>Sign in to continue</Text>
+                    </View>
 
-                <View className='space-y-4 flex flex-col justify-center gap-2'>
-                    <TextInput
-                        className='border border-gray-200 rounded-xl p-4 bg-gray-50 text-gray-800'
-                        placeholder='Email'
-                        value={formData?.email}
-                        onChangeText={(text) => setFormData((prev) => ({ ...prev, email: text }))}
-                        placeholderTextColor='#9CA3AF'
-                    />
-                    {errors?.email && <Text className='text-red-500'>{errors.email}</Text>}
+                    <View className='space-y-4 flex flex-col justify-center gap-2'>
+                        <TextInput
+                            className='border border-gray-200 rounded-xl p-4 bg-gray-50 text-gray-800'
+                            placeholder='Email'
+                            value={formData?.email}
+                            onChangeText={(text) => setFormData((prev) => ({ ...prev, email: text }))}
+                            placeholderTextColor='#9CA3AF'
+                        />
+                        {errors?.email && <Text className='text-red-500'>{errors.email}</Text>}
+
+                        <View className='relative'>
+                            <TextInput
+                                className='border border-gray-200 rounded-xl p-4 pr-12 bg-gray-50 text-gray-800'
+                                placeholder='Password'
+                                value={formData?.password}
+                                onChangeText={(text) => setFormData((prev) => ({ ...prev, password: text }))}
+                                placeholderTextColor='#9CA3AF'
+                                secureTextEntry={!showPassword}
+                            />
+
+                            <TouchableOpacity
+                                onPress={() => setShowPassword(!showPassword)}
+                                className='absolute right-4 top-4'>
+                                <Ionicons name={showPassword ? "eye-off" : "eye"} size={22} color='#6B7280' />
+                            </TouchableOpacity>
+                            {errors?.password && <Text className='text-red-500'>{errors.password}</Text>}
+                        </View>
+                        <TextInput
+                            className='border border-gray-200 rounded-xl p-4 bg-gray-50 text-gray-800'
+                            placeholder='Company Id'
+                            value={formData?.companyId}
+                            onChangeText={(text) => setFormData((prev) => ({ ...prev, companyId: text }))}
+                            inputMode='numeric'
+                            keyboardType='numeric'
+                            placeholderTextColor='#9CA3AF'
+                        />
+                        {errors?.companyId && <Text className='text-red-500'>{errors.companyId}</Text>}
+                    </View>
 
                     <View className='relative'>
-                        <TextInput
-                            className='border border-gray-200 rounded-xl p-4 pr-12 bg-gray-50 text-gray-800'
-                            placeholder='Password'
-                            value={formData?.password}
-                            onChangeText={(text) => setFormData((prev) => ({ ...prev, password: text }))}
-                            placeholderTextColor='#9CA3AF'
-                            secureTextEntry={!showPassword}
-                        />
-
-                        <TouchableOpacity
-                            onPress={() => setShowPassword(!showPassword)}
-                            className='absolute right-4 top-4'>
-                            <Ionicons name={showPassword ? "eye-off" : "eye"} size={22} color='#6B7280' />
+                        <TouchableOpacity className='bg-blue-600 rounded-xl p-2 mt-6 active:opacity-80' onPress={Login}>
+                            <Text className='text-white text-center font-semibold text-lg'>Login</Text>
                         </TouchableOpacity>
-                        {errors?.password && <Text className='text-red-500'>{errors.password}</Text>}
+
+                        {loading && <ActivityIndicator className='absolute right-10 top-9' color={"#fff"} />}
                     </View>
-                    <TextInput
-                        className='border border-gray-200 rounded-xl p-4 bg-gray-50 text-gray-800'
-                        placeholder='Company Id'
-                        value={formData?.companyId}
-                        onChangeText={(text) => setFormData((prev) => ({ ...prev, companyId: text }))}
-                        inputMode='numeric'
-                        keyboardType='numeric'
-                        placeholderTextColor='#9CA3AF'
-                    />
-                    {errors?.companyId && <Text className='text-red-500'>{errors.companyId}</Text>}
-                </View>
-
-                <View className='relative'>
-                    <TouchableOpacity className='bg-blue-600 rounded-xl p-2 mt-6 active:opacity-80' onPress={Login}>
-                        <Text className='text-white text-center font-semibold text-lg'>Login</Text>
-                    </TouchableOpacity>
-
-                    {loading && <ActivityIndicator className='absolute right-10 top-9' color={"#fff"} />}
                 </View>
             </View>
-        </View>
+        </TouchableWithoutFeedback>
     );
 };
 

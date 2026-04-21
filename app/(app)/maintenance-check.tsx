@@ -1,13 +1,15 @@
 import AppScreen from "@/components/common/AppScreen";
 import MaintenanceCheck from "@/components/search/MaintenanceCheck";
 import React from "react";
-import { View } from "react-native";
+import { Keyboard, TouchableWithoutFeedback, View } from "react-native";
 
 const MaintenanceCheckView = () => {
     return (
-        <View style={{ flex: 1 }}>
-            <MaintenanceCheck />
-        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+            <View style={{ flex: 1 }}>
+                <MaintenanceCheck />
+            </View>
+        </TouchableWithoutFeedback>
     );
 };
 

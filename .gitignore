@@ -8,6 +8,11 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
+credentials.json
+credentials/
+
+# google-services.json
+tag-xl-firebase-adminsdk-fbsvc-a90088e22d.json
 
 # Native
 .kotlin/

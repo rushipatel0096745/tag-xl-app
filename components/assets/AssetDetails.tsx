@@ -405,12 +405,11 @@ const AssetDetails = ({ id }: { id: string }) => {
                                 contentFit='fill'
                             />
                         </View>
-
                         {/* asset-info */}
                         <View className='flex flex-col justify-between border rounded-xl border-gray-400'>
-                            {asset?.status !== 2 && (
-                                <View className='flex flex-row justify-between items-center border-b border-gray-400 py-2 px-4'>
-                                    <Text className='font-semibold text-[16px]'>Details</Text>
+                            <View className='flex flex-row justify-between items-center border-b border-gray-400 py-2 px-4'>
+                                <Text className='font-semibold text-[16px]'>Details</Text>
+                                {asset?.status !== 1 && asset?.status !== 2 && (
                                     <TouchableOpacity
                                         className='bg-[#263f94] rounded-xl px-3 py-2 active:opacity-80'
                                         onPress={() => {
@@ -423,8 +422,8 @@ const AssetDetails = ({ id }: { id: string }) => {
                                         }}>
                                         <Text className='text-white text-center font-semibold text-sm'>Edit</Text>
                                     </TouchableOpacity>
-                                </View>
-                            )}
+                                )}
+                            </View>
                             <View className='flex flex-col justify-between gap-4 py-2 px-4'>
                                 <View className='asset-info flex flex-col justify-between '>
                                     <Text className='text-sm text-gray-500'>Asset Name</Text>
