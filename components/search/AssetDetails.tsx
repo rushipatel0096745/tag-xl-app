@@ -2,8 +2,8 @@ import { useAuth } from "@/context/AuthContext";
 import { GetAssetWithTag } from "@/services/asset";
 import { AssetDetail } from "@/types/Aseet";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { router, useFocusEffect } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
 import { Alert, Linking, Text, TouchableOpacity, View } from "react-native";
 
 const AssetDetails = ({ uid }: { uid: string }) => {
@@ -56,8 +56,14 @@ const AssetDetails = ({ uid }: { uid: string }) => {
         ]);
     };
 
+    useFocusEffect(
+        useCallback(() => {
+            fetchAssetWithTag();
+        }, [uid])
+    );
+
     useEffect(() => {
-        setAsset(null); // Clear old asset data
+        // setAsset(null); // Clear old asset data
         fetchAssetWithTag();
         console.log("uid: ", uid);
         console.log(new Date().toString());

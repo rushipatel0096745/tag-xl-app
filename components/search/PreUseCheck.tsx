@@ -95,7 +95,7 @@ const PreUseCheck = () => {
 
     useEffect(() => {
         fetchAsset();
-    }, []);
+    }, [asset_id]);
 
     useEffect(() => {
         console.log("answers: ", JSON.stringify(answers, null, 2));
@@ -318,7 +318,7 @@ const PreUseCheck = () => {
                 {
                     text: "OK",
                     onPress: () => {
-                        router.push({
+                        router.replace({
                             pathname: "/(app)/(tabs)/search-asset/asset-detail",
                             params: { uid: asset?.tag?.uid },
                         });

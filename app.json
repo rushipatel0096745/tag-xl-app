@@ -46,7 +46,8 @@
                 {
                     "android": {
                         "enableShrinkResourcesInReleaseBuilds": true,
-                        "enableProguardInReleaseBuilds": true
+                        "enableProguardInReleaseBuilds": true,
+                        "buildArchs": ["arm64-v8a"]
                     }
                 }
             ],
@@ -59,7 +60,7 @@
                     "backgroundColor": "#ffffff",
                     "dark": {
                         "backgroundColor": "#000000"
-                    }
+                     }
                 }
             ],
             [
@@ -79,6 +80,7 @@
                 }
             ],
             ["expo-notifications"],
+            // ["./plugins/withCustomGradle"],
             "expo-secure-store",
             "@react-native-community/datetimepicker",
             "react-native-nfc-manager"

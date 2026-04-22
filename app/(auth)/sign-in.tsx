@@ -71,6 +71,7 @@ const SignIn = () => {
             }
         } catch (error) {
             setLoading(false);
+            Alert.alert("Server", "Server is not responding at the moment. Please try again later.");
             console.log("login error: ", error);
         } finally {
             setLoading(false);

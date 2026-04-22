@@ -24,11 +24,13 @@ export default function Index() {
     const [dashboardData, setDashboardData] = useState<DashboardData>(initialDashboardData);
 
     const fetchDashboardData = async () => {
-        const result = await GetDashboardData();
 
-        if (result.has_error && result.message === "Invalid or expired session") {
-            Alert.alert("Session Over", "", [
-                {
+        try {
+            const result = await GetDashboardData();
+
+            if (result.has_error && result.message === "Invalid or expired session") {
+                Alert.alert("Session Over", "", [
+                    {
                     text: "OK",
                     onPress: () => {
                         logOut();
@@ -47,6 +49,9 @@ export default function Index() {
         const { has_error, message, ...dashboardFields } = result;
 
         setDashboardData(dashboardFields);
+        } catch (error) {
+            Alert.alert("Error", "Failed to fetch dashboard data");
+        }
     };
 
     useEffect(() => {
@@ -54,7 +59,7 @@ export default function Index() {
     }, []);
 
     const onRefresh = async () => {
-        setRefreshing(true);
+        setRefreshing(true);    
         await fetchDashboardData();
         setRefreshing(false);
     };
